@@ -8,35 +8,24 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     :root {
-      --bg: #F1F5F9;
-      --card: #FFFFFF;
-      --card2: #F8FAFC;
-      --yellow: #F59E0B;
-      --yellow-dark: #D97706;
-      --green: #059669;
-      --red: #DC2626;
-      --text: #1E293B;
-      --muted: #64748B;
-      --border: #E2E8F0;
-      --shadow: 0 1px 4px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
+      --bg: #F1F5F9; --card: #FFFFFF; --card2: #F8FAFC;
+      --yellow: #F59E0B; --yellow-dark: #D97706;
+      --green: #059669; --red: #DC2626;
+      --text: #1E293B; --muted: #64748B; --border: #E2E8F0;
       --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
 
-    /* ── LOGIN ── */
-    #login-screen {
-      display: flex; align-items: center; justify-content: center;
-      min-height: 100vh; background: var(--bg);
-    }
+    /* LOGIN */
+    #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
     .login-card {
       background: var(--card); border-radius: 20px; box-shadow: 0 4px 24px rgba(0,0,0,0.10);
       padding: 48px 40px; width: 380px; text-align: center;
     }
-    .login-card h1 { font-size: 1.25rem; font-weight: 700; color: var(--text); margin: 18px 0 4px; }
-    .login-card .sub-zh {
-      font-family: 'Noto Sans SC', sans-serif; font-size: 0.88rem; color: var(--muted); margin-bottom: 32px;
-    }
+    @media (max-width: 420px) { .login-card { width: 94vw; padding: 36px 24px; } }
+    .login-card h1 { font-size: 1.2rem; font-weight: 700; margin: 18px 0 4px; }
+    .login-card .sub-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.85rem; color: var(--muted); margin-bottom: 28px; }
     .login-card input {
       width: 100%; padding: 12px 16px; background: var(--bg); border: 1.5px solid var(--border);
       border-radius: 10px; color: var(--text); font-size: 1rem; margin-bottom: 14px; outline: none;
@@ -47,23 +36,17 @@
       width: 100%; padding: 13px; background: var(--yellow); color: #fff;
       font-weight: 700; font-size: 1rem; border: none; border-radius: 10px; cursor: pointer;
       display: flex; align-items: center; justify-content: center; gap: 8px;
-      box-shadow: 0 2px 8px rgba(245,158,11,0.3);
     }
     .login-card .login-btn:hover { background: var(--yellow-dark); }
     .login-error { color: var(--red); font-size: 0.83rem; margin-top: 12px; min-height: 18px; }
     .logo-ring { display: flex; justify-content: center; margin-bottom: 4px; }
 
-    /* ── APP ── */
+    /* APP */
     #app { display: none; }
 
-    /* ── DB SETUP BANNER ── */
-    #setup-banner {
-      background: #FFFBEB; border-bottom: 2px solid #F59E0B;
-      padding: 16px 24px; display: none;
-    }
-    #setup-banner .sb-title {
-      font-weight: 700; color: #92400E; font-size: 0.95rem; margin-bottom: 6px;
-    }
+    /* DB SETUP BANNER */
+    #setup-banner { background: #FFFBEB; border-bottom: 2px solid #F59E0B; padding: 16px 24px; display: none; }
+    #setup-banner .sb-title { font-weight: 700; color: #92400E; font-size: 0.95rem; margin-bottom: 6px; }
     #setup-banner .sb-body { font-size: 0.84rem; color: #78350F; line-height: 1.6; }
     #setup-banner .sb-steps { margin: 10px 0 0 16px; font-size: 0.83rem; color: #78350F; }
     #setup-banner .sb-steps li { margin-bottom: 4px; }
@@ -71,9 +54,8 @@
       margin-top: 12px; padding: 7px 16px; background: var(--yellow); color: #fff;
       border: none; border-radius: 8px; cursor: pointer; font-size: 0.82rem; font-weight: 600;
     }
-    #setup-banner .copy-btn:hover { background: var(--yellow-dark); }
 
-    /* ── ALERT BAR ── */
+    /* ALERT BAR */
     #alert-bar {
       background: #FEF2F2; border-bottom: 2px solid #FECACA;
       padding: 10px 24px; align-items: center; gap: 10px; font-size: 0.84rem;
@@ -82,203 +64,196 @@
     #alert-bar strong { color: #991B1B; }
     #alert-bar span { color: #B91C1C; }
 
-    /* ── HEADER ── */
+    /* HEADER */
     header {
       background: var(--card); border-bottom: 1px solid var(--border);
-      padding: 0 24px; display: flex; align-items: center; height: 64px; gap: 16px;
+      padding: 0 16px; display: flex; align-items: center; height: 60px; gap: 12px;
       box-shadow: var(--shadow-sm);
     }
-    .hdr-name { font-weight: 700; font-size: 1rem; line-height: 1.2; color: var(--text); }
-    .hdr-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.73rem; color: var(--muted); }
+    .hdr-name { font-weight: 700; font-size: 0.95rem; color: var(--text); }
     .logout-btn {
       margin-left: auto; background: transparent; border: 1.5px solid var(--border);
-      color: var(--muted); padding: 7px 16px; border-radius: 8px; cursor: pointer; font-size: 0.8rem;
-      transition: all 0.15s;
+      color: var(--muted); padding: 6px 14px; border-radius: 8px; cursor: pointer;
+      font-size: 0.78rem; white-space: nowrap; transition: all 0.15s;
     }
     .logout-btn:hover { border-color: var(--red); color: var(--red); }
 
-    /* ── TABS ── */
+    /* TABS */
     nav {
       background: var(--card); border-bottom: 1px solid var(--border);
-      padding: 0 20px; display: flex; gap: 2px; overflow-x: auto;
+      padding: 0 12px; display: flex; gap: 0; overflow-x: auto; -webkit-overflow-scrolling: touch;
     }
     nav::-webkit-scrollbar { height: 0; }
     .tab-btn {
-      padding: 13px 20px; border: none; background: none; color: var(--muted);
+      padding: 11px 14px; border: none; background: none; color: var(--muted);
       cursor: pointer; border-bottom: 3px solid transparent;
       white-space: nowrap; position: relative; display: flex;
       flex-direction: column; align-items: flex-start; transition: color 0.15s;
+      flex-shrink: 0;
     }
     .tab-btn:hover { color: var(--text); }
-    .tab-en { font-size: 0.88rem; font-weight: 500; }
-    .tab-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.67rem; color: var(--muted); line-height: 1.2; }
+    .tab-en { font-size: 0.83rem; font-weight: 500; }
+    .tab-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.64rem; color: var(--muted); line-height: 1.2; }
     .tab-btn.active { color: var(--yellow-dark); border-bottom-color: var(--yellow); }
     .tab-btn.active .tab-en { font-weight: 600; }
     .tab-btn.active .tab-zh { color: #92400E; }
-    .tab-dot {
-      position: absolute; top: 9px; right: 6px;
-      width: 7px; height: 7px; border-radius: 50%; background: var(--red);
-    }
+    .tab-dot { position: absolute; top: 8px; right: 4px; width: 7px; height: 7px; border-radius: 50%; background: var(--red); }
+    .tab-sep { width: 1px; background: var(--border); margin: 10px 10px; flex-shrink: 0; }
 
-    /* ── MAIN ── */
-    main { padding: 24px; max-width: 1200px; margin: 0 auto; }
+    /* MAIN */
+    main { padding: 16px; max-width: 1200px; margin: 0 auto; }
+    @media (min-width: 600px) { main { padding: 24px; } }
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
-    /* ── SECTION HEADER ── */
-    .sec-head {
-      display: flex; align-items: flex-end; justify-content: space-between;
-      margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
-    }
-    .sec-title .en { font-size: 1.2rem; font-weight: 700; color: var(--text); }
-    .sec-title .zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+    /* SECTION HEADER */
+    .sec-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+    .sec-title .en { font-size: 1.1rem; font-weight: 700; }
+    .sec-title .zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
 
-    /* ── CARD ── */
-    .card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-      padding: 22px; margin-bottom: 20px; box-shadow: var(--shadow-sm);
-    }
-    .card-title {
-      font-weight: 600; font-size: 0.95rem; margin-bottom: 18px;
-      display: flex; align-items: center; gap: 8px; color: var(--text);
-    }
-    .card-title .zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.75rem; color: var(--muted); font-weight: 400; }
+    /* CARD */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+    .card-title { font-weight: 600; font-size: 0.93rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .card-title .zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.73rem; color: var(--muted); font-weight: 400; }
 
-    /* ── FORM ── */
-    .form-grid { display: grid; gap: 14px; }
+    /* FORM */
+    .form-grid { display: grid; gap: 12px; }
     .cols-2 { grid-template-columns: 1fr 1fr; }
     .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
     .cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
-    @media (max-width: 780px) {
-      .cols-2, .cols-3, .cols-4 { grid-template-columns: 1fr; }
-    }
-    .form-actions { margin-top: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .lbl-en { font-size: 0.8rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
-    .lbl-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.68rem; color: var(--muted); margin-bottom: 5px; }
+    @media (max-width: 600px) { .cols-2,.cols-3,.cols-4 { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 400px) { .cols-2,.cols-3,.cols-4 { grid-template-columns: 1fr; } }
+    .form-actions { margin-top: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .lbl-en { font-size: 0.78rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .lbl-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.66rem; color: var(--muted); margin-bottom: 4px; }
     input[type=text], input[type=date], input[type=number], textarea, select {
-      width: 100%; padding: 9px 12px; background: var(--bg); border: 1.5px solid var(--border);
-      border-radius: 8px; color: var(--text); font-size: 0.88rem; font-family: 'Inter', sans-serif;
+      width: 100%; padding: 9px 11px; background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 0.86rem; font-family: 'Inter', sans-serif;
       outline: none; transition: border-color 0.15s, background 0.15s;
+      -webkit-appearance: none; appearance: none;
     }
     input:focus, textarea:focus, select:focus { border-color: var(--yellow); background: #fff; }
-    textarea { resize: vertical; min-height: 80px; }
-    .form-err { font-size: 0.8rem; color: var(--red); display: none; }
+    textarea { resize: vertical; min-height: 76px; }
+    .form-err { font-size: 0.79rem; color: var(--red); display: none; }
 
-    /* ── BUTTONS ── */
+    /* BUTTONS */
     .btn {
-      padding: 9px 18px; border: none; border-radius: 8px; cursor: pointer;
-      font-size: 0.84rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 16px; border: none; border-radius: 8px; cursor: pointer;
+      font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;
       font-family: 'Inter', sans-serif; transition: opacity 0.15s, background 0.15s;
+      touch-action: manipulation;
     }
-    .btn-primary { background: var(--yellow); color: #fff; box-shadow: 0 1px 4px rgba(245,158,11,0.25); }
+    .btn-primary { background: var(--yellow); color: #fff; }
     .btn-primary:hover { background: var(--yellow-dark); }
     .btn-success { background: var(--green); color: #fff; }
     .btn-success:hover { opacity: 0.88; }
     .btn-danger { background: #FEF2F2; color: var(--red); border: 1.5px solid #FECACA; }
     .btn-danger:hover { background: #FEE2E2; }
-    .btn-sm { padding: 5px 11px; font-size: 0.76rem; }
+    .btn-sm { padding: 5px 10px; font-size: 0.74rem; }
 
-    /* ── FILTER ── */
-    .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    /* FILTER + SORT */
+    .controls-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+    .filter-bar { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; min-width: 180px; }
     .filter-btn {
-      padding: 5px 16px; border: 1.5px solid var(--border); border-radius: 20px;
-      background: var(--card); color: var(--muted); cursor: pointer; font-size: 0.8rem;
-      font-family: 'Inter', sans-serif; transition: all 0.15s;
+      padding: 5px 13px; border: 1.5px solid var(--border); border-radius: 20px;
+      background: var(--card); color: var(--muted); cursor: pointer; font-size: 0.78rem;
+      font-family: 'Inter', sans-serif; transition: all 0.15s; touch-action: manipulation;
     }
-    .filter-btn:hover { border-color: var(--yellow); color: var(--yellow-dark); }
-    .filter-btn.active { border-color: var(--yellow); color: var(--yellow-dark); background: #FFFBEB; font-weight: 600; }
+    .filter-btn:hover, .filter-btn.active { border-color: var(--yellow); color: var(--yellow-dark); background: #FFFBEB; }
+    .filter-btn.active { font-weight: 600; }
+    .sort-row { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .sort-lbl { font-size: 0.76rem; color: var(--muted); font-weight: 500; }
+    .sort-btn {
+      padding: 5px 11px; border: 1.5px solid var(--border); border-radius: 20px;
+      background: var(--card); color: var(--muted); cursor: pointer; font-size: 0.76rem;
+      font-family: 'Inter', sans-serif; transition: all 0.15s; touch-action: manipulation;
+    }
+    .sort-btn:hover, .sort-btn.active { border-color: var(--yellow); color: var(--yellow-dark); background: #FFFBEB; }
+    .sort-btn.active { font-weight: 600; }
 
-    /* ── TABLE ── */
-    .tbl-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
-    th {
-      text-align: left; padding: 10px 14px; border-bottom: 2px solid var(--border);
-      color: var(--muted); font-weight: 600; white-space: nowrap; background: var(--card2);
-    }
-    th:first-child { border-radius: 8px 0 0 0; }
-    th:last-child  { border-radius: 0 8px 0 0; }
-    .col-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.66rem; display: block; font-weight: 400; color: #94A3B8; }
-    td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text); }
+    /* SEARCH */
+    .search-wrap { position: relative; margin-bottom: 12px; }
+    .search-wrap input { padding-left: 34px; padding-right: 32px; }
+    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.9rem; pointer-events: none; }
+    .search-clear { display: none; position: absolute; right: 9px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1.1rem; line-height: 1; padding: 2px; }
+
+    /* TABLE */
+    .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.84rem; min-width: 480px; }
+    th { text-align: left; padding: 9px 12px; border-bottom: 2px solid var(--border); color: var(--muted); font-weight: 600; white-space: nowrap; background: var(--card2); }
+    .col-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.64rem; display: block; font-weight: 400; color: #94A3B8; }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #FAFBFF; }
-    .td-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .td-actions { display: flex; gap: 5px; flex-wrap: wrap; }
 
-    /* ── BADGES ── */
-    .badge {
-      display: inline-block; padding: 3px 10px; border-radius: 10px;
-      font-size: 0.74rem; font-weight: 600; white-space: nowrap;
-    }
-    .badge-paid    { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
-    .badge-unpaid  { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
-    .badge-expired { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
-    .badge-urgent  { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
-    .badge-soon    { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
-    .badge-ok      { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    /* BADGES */
+    .badge { display: inline-block; padding: 3px 9px; border-radius: 10px; font-size: 0.73rem; font-weight: 600; white-space: nowrap; }
+    .badge-paid     { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .badge-unpaid   { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+    .badge-accepted { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .badge-pending  { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .badge-expired  { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+    .badge-urgent   { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+    .badge-soon     { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+    .badge-ok       { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
 
-    /* ── SUMMARY BAR ── */
-    .summary-bar { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
-    .sum-item {
-      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-      padding: 14px 20px; min-width: 130px; box-shadow: var(--shadow-sm);
-    }
-    .sum-val { font-size: 1.3rem; font-weight: 700; color: var(--yellow-dark); }
-    .sum-lbl { font-size: 0.73rem; color: var(--muted); margin-top: 3px; font-weight: 500; }
-    .sum-lbl-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.66rem; color: #94A3B8; }
+    /* SUMMARY BAR */
+    .summary-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .sum-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; min-width: 110px; box-shadow: var(--shadow-sm); }
+    .sum-val { font-size: 1.15rem; font-weight: 700; color: var(--yellow-dark); }
+    .sum-lbl { font-size: 0.71rem; color: var(--muted); margin-top: 2px; font-weight: 500; }
+    .sum-lbl-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.64rem; color: #94A3B8; }
 
-    /* ── SORT BUTTONS ── */
-    .sort-btn {
-      padding: 5px 12px; border: 1.5px solid var(--border); border-radius: 20px;
-      background: var(--card); color: var(--muted); cursor: pointer; font-size: 0.78rem;
-      font-family: 'Inter', sans-serif; transition: all 0.15s;
-    }
-    .sort-btn:hover { border-color: var(--yellow); color: var(--yellow-dark); }
-    .sort-btn.active { border-color: var(--yellow); color: var(--yellow-dark); background: #FFFBEB; font-weight: 600; }
-
-    /* ── PRICES ── */
-    .prices-meta { font-size: 0.82rem; color: var(--muted); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    /* PRICES INFO */
+    .prices-meta { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
     .avg-cell { font-weight: 700; color: var(--yellow-dark); }
-    .info-card {
-      background: #FFFBEB; border: 1.5px solid #FDE68A; border-radius: 14px;
-      padding: 20px 24px; margin-bottom: 20px;
-    }
-    .info-card .ic-title { font-weight: 700; font-size: 0.95rem; color: #78350F; margin-bottom: 12px; }
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
-    .info-point { display: flex; gap: 10px; align-items: flex-start; }
-    .info-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
-    .info-en { font-size: 0.84rem; font-weight: 600; color: #78350F; line-height: 1.4; }
-    .info-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.74rem; color: #92400E; margin-top: 2px; line-height: 1.5; }
-    .tier-legend { margin-top: 16px; padding-top: 14px; border-top: 1px solid #FDE68A; display: flex; gap: 20px; flex-wrap: wrap; }
-    .tier-item { font-size: 0.8rem; }
+    .info-card { background: #FFFBEB; border: 1.5px solid #FDE68A; border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+    .info-card .ic-title { font-weight: 700; font-size: 0.93rem; color: #78350F; margin-bottom: 12px; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 560px) { .info-grid { grid-template-columns: 1fr; } }
+    .info-point { display: flex; gap: 9px; align-items: flex-start; }
+    .info-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+    .info-en { font-size: 0.82rem; font-weight: 600; color: #78350F; line-height: 1.4; }
+    .info-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.72rem; color: #92400E; margin-top: 2px; line-height: 1.55; }
+    .tier-legend { margin-top: 14px; padding-top: 12px; border-top: 1px solid #FDE68A; display: flex; gap: 16px; flex-wrap: wrap; }
+    .tier-item { font-size: 0.78rem; }
     .tier-label { font-weight: 600; color: #78350F; }
-    .tier-desc { color: #92400E; margin-left: 4px; }
-    .tier-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.7rem; color: #A16207; }
+    .tier-desc { color: #92400E; margin-left: 3px; }
 
-    /* ── EMPTY / SPINNER ── */
-    .empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 0.88rem; }
-    .spinner {
-      display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border);
-      border-top-color: var(--yellow); border-radius: 50%; animation: spin 0.6s linear infinite;
-      vertical-align: middle; margin-right: 6px;
-    }
+    /* HOW-TO-USE */
+    .howto-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 14px; box-shadow: var(--shadow-sm); }
+    .howto-card h3 { font-family: 'Noto Sans SC', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .howto-card p, .howto-card li { font-family: 'Noto Sans SC', sans-serif; font-size: 0.84rem; color: #334155; line-height: 1.8; }
+    .howto-card ul, .howto-card ol { padding-left: 18px; }
+    .howto-card li { margin-bottom: 4px; }
+    .howto-intro { background: linear-gradient(135deg, #FFFBEB 0%, #FEF9EC 100%); border: 1.5px solid #FDE68A; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    .howto-intro h2 { font-family: 'Noto Sans SC', sans-serif; font-size: 1.1rem; font-weight: 700; color: #78350F; margin-bottom: 8px; }
+    .howto-intro p { font-family: 'Noto Sans SC', sans-serif; font-size: 0.86rem; color: #92400E; line-height: 1.8; }
+    .howto-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 620px) { .howto-grid { grid-template-columns: 1fr; } }
+    .badge-legend { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+
+    /* EMPTY / SPINNER */
+    .empty { text-align: center; padding: 36px 16px; color: var(--muted); font-size: 0.86rem; }
+    .spinner { display: inline-block; width: 15px; height: 15px; border: 2px solid var(--border); border-top-color: var(--yellow); border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 5px; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
-<!-- ════════════════ LOGIN ════════════════ -->
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
     <div class="logo-ring">
-      <svg width="64" height="64" viewBox="0 0 60 60" fill="none">
+      <svg width="62" height="62" viewBox="0 0 60 60" fill="none">
         <circle cx="30" cy="30" r="30" fill="#F59E0B"/>
         <polygon points="35,9 21,30 29,30 25,51 39,30 31,30" fill="#1E293B"/>
       </svg>
     </div>
     <h1>Evergrow Electrical Service</h1>
-    <div class="sub-zh">长青电气服务 · 管理系统</div>
-    <input type="password" id="pw-input" placeholder="Password / 密码"
-           onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="sub-zh">Manager Portal · 管理系统</div>
+    <input type="password" id="pw-input" placeholder="Password / 密码" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="login-btn" onclick="doLogin()">
       Login&nbsp;<span style="font-family:'Noto Sans SC',sans-serif;font-weight:400;font-size:0.9em">登录</span>
     </button>
@@ -286,46 +261,41 @@
   </div>
 </div>
 
-<!-- ════════════════ APP ════════════════ -->
+<!-- APP -->
 <div id="app">
 
-  <!-- DB Setup Banner -->
   <div id="setup-banner">
     <div class="sb-title">⚠️ Database tables not set up yet / 数据库尚未配置</div>
     <div class="sb-body">
-      The portal is connected but the database tables are missing. Please follow these steps:
+      The portal is connected but tables are missing. Steps:
       <ol class="sb-steps">
-        <li>Go to your <strong>Supabase Dashboard</strong> → project <strong>wimlphbdiborlwikjfdi</strong></li>
-        <li>Click <strong>SQL Editor</strong> → <strong>New Query</strong></li>
-        <li>Paste the SQL below and click <strong>Run</strong></li>
+        <li>Go to Supabase Dashboard → project <strong>wimlphbdiborlwikjfdi</strong></li>
+        <li>SQL Editor → New Query → paste the SQL → Run</li>
         <li>Refresh this page</li>
       </ol>
     </div>
     <button class="copy-btn" onclick="copySetupSql()">📋 Copy Setup SQL / 复制SQL</button>
   </div>
 
-  <!-- Alert Bar -->
   <div id="alert-bar">
     <strong>⚠ Urgent / 紧急 ·</strong>&nbsp;<span id="alert-text"></span>
   </div>
 
-  <!-- Header -->
   <header>
-    <svg width="38" height="38" viewBox="0 0 60 60" fill="none">
+    <svg width="34" height="34" viewBox="0 0 60 60" fill="none">
       <circle cx="30" cy="30" r="30" fill="#F59E0B"/>
       <polygon points="35,9 21,30 29,30 25,51 39,30 31,30" fill="#1E293B"/>
     </svg>
-    <div>
-      <div class="hdr-name">Evergrow Electrical Service</div>
-      <div class="hdr-zh">长青电气服务</div>
-    </div>
+    <div class="hdr-name">Evergrow Electrical Service</div>
     <button class="logout-btn" onclick="doLogout()">Logout / 登出</button>
   </header>
 
-  <!-- Tab Nav -->
   <nav>
     <button class="tab-btn active" onclick="showTab('invoices',this)" id="tabn-invoices">
       <span class="tab-en">Invoices</span><span class="tab-zh">发票</span>
+    </button>
+    <button class="tab-btn" onclick="showTab('quotations',this)" id="tabn-quotations">
+      <span class="tab-en">Quotations</span><span class="tab-zh">报价单</span>
     </button>
     <button class="tab-btn" onclick="showTab('permits',this)" id="tabn-permits">
       <span class="tab-en">Work Permits</span><span class="tab-zh">工作准证</span>
@@ -339,222 +309,205 @@
     <button class="tab-btn" onclick="showTab('prices',this)" id="tabn-prices">
       <span class="tab-en">Prices</span><span class="tab-zh">参考价格</span>
     </button>
+    <button class="tab-btn" onclick="showTab('licensing',this)" id="tabn-licensing">
+      <span class="tab-en">Licensing Inv.</span><span class="tab-zh">牌照发票</span>
+    </button>
+    <div class="tab-sep"></div>
+    <button class="tab-btn" onclick="showTab('howto',this)" id="tabn-howto">
+      <span class="tab-en">How to Use</span><span class="tab-zh">使用说明</span>
+    </button>
   </nav>
 
   <main>
 
-    <!-- ══════ INVOICES ══════ -->
+    <!-- ══ INVOICES ══ -->
     <div class="tab-panel active" id="panel-invoices">
       <div class="sec-head">
-        <div class="sec-title">
-          <div class="en">Invoice Management</div>
-          <div class="zh">发票管理</div>
-        </div>
+        <div class="sec-title"><div class="en">Invoice Management</div><div class="zh">发票管理</div></div>
       </div>
-
       <div class="card">
         <div class="card-title">➕ Add Invoice <span class="zh">添加发票</span></div>
         <div class="form-grid cols-4">
-          <label>
-            <div class="lbl-en">Date</div><div class="lbl-zh">日期</div>
-            <input type="date" id="inv-date">
-          </label>
-          <label>
-            <div class="lbl-en">Invoice Number</div><div class="lbl-zh">发票号码</div>
-            <input type="text" id="inv-number" placeholder="INV-001">
-          </label>
-          <label>
-            <div class="lbl-en">Company Name</div><div class="lbl-zh">公司名称</div>
-            <input type="text" id="inv-company" placeholder="Company Pte Ltd">
-          </label>
-          <label>
-            <div class="lbl-en">Amount (SGD)</div><div class="lbl-zh">金额（新元）</div>
-            <input type="number" id="inv-amount" placeholder="0.00" step="0.01" min="0">
-          </label>
+          <label><div class="lbl-en">Date</div><div class="lbl-zh">日期</div><input type="date" id="inv-date"></label>
+          <label><div class="lbl-en">Invoice Number</div><div class="lbl-zh">发票号码</div><input type="text" id="inv-number" placeholder="INV-001"></label>
+          <label><div class="lbl-en">Company Name</div><div class="lbl-zh">公司名称</div><input type="text" id="inv-company" placeholder="Company Pte Ltd"></label>
+          <label><div class="lbl-en">Amount (SGD)</div><div class="lbl-zh">金额（新元）</div><input type="number" id="inv-amount" placeholder="0.00" step="0.01" min="0"></label>
         </div>
         <div class="form-actions">
           <button class="btn btn-primary" onclick="addInvoice()">Add Invoice / 添加发票</button>
           <span class="form-err" id="inv-err"></span>
         </div>
       </div>
-
       <div class="summary-bar" id="inv-summary"></div>
-
-      <div style="margin-bottom:14px;position:relative;max-width:340px;">
-        <input type="text" id="inv-search" placeholder="Search invoice number / 搜索发票号码"
-               oninput="setInvSearch(this.value)" autocomplete="off"
-               style="padding-left:36px;padding-right:36px;">
-        <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:0.95rem;pointer-events:none;">🔍</span>
-        <button id="inv-search-clear" onclick="clearInvSearch()" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;line-height:1;padding:2px;">×</button>
+      <div class="search-wrap" style="max-width:320px;">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="inv-search" placeholder="Search invoice no. / 搜索发票号" oninput="setInvSearch(this.value)" autocomplete="off">
+        <button class="search-clear" id="inv-search-clear" onclick="clearInvSearch()">×</button>
       </div>
-
-      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
-        <div class="filter-bar" style="margin-bottom:0;flex:1;min-width:200px;">
+      <div class="controls-row">
+        <div class="filter-bar" id="inv-filters">
           <button class="filter-btn active" onclick="setInvFilter('all',this)">All / 全部</button>
           <button class="filter-btn" onclick="setInvFilter('unpaid',this)">Unpaid / 未付款</button>
           <button class="filter-btn" onclick="setInvFilter('paid',this)">Paid / 已付款</button>
         </div>
-        <div style="display:flex;align-items:center;gap:6px;white-space:nowrap;">
-          <span style="font-size:0.78rem;color:var(--muted);font-weight:500;">Sort / 排序：</span>
-          <button class="sort-btn active" id="sort-date" onclick="setInvSort('date',this)">Date / 日期 ↓</button>
-          <button class="sort-btn" id="sort-company" onclick="setInvSort('company',this)">Company / 公司 A–Z</button>
+        <div class="sort-row">
+          <span class="sort-lbl">Sort / 排序：</span>
+          <button class="sort-btn active" onclick="setInvSort('date',this)">Date / 日期 ↓</button>
+          <button class="sort-btn" onclick="setInvSort('company',this)">Company / 公司 A–Z</button>
         </div>
       </div>
-
       <div class="card">
         <div class="tbl-wrap">
           <table>
-            <thead>
-              <tr>
-                <th>Date<span class="col-zh">日期</span></th>
-                <th>Invoice No.<span class="col-zh">发票号</span></th>
-                <th>Company<span class="col-zh">公司</span></th>
-                <th>Amount<span class="col-zh">金额</span></th>
-                <th>Status<span class="col-zh">状态</span></th>
-                <th>Paid On<span class="col-zh">付款日期</span></th>
-                <th>Actions<span class="col-zh">操作</span></th>
-              </tr>
-            </thead>
-            <tbody id="inv-tbody">
-              <tr><td colspan="7" class="empty"><span class="spinner"></span> Loading...</td></tr>
-            </tbody>
+            <thead><tr>
+              <th>Date<span class="col-zh">日期</span></th>
+              <th>Invoice No.<span class="col-zh">发票号</span></th>
+              <th>Company<span class="col-zh">公司</span></th>
+              <th>Amount<span class="col-zh">金额</span></th>
+              <th>Status<span class="col-zh">状态</span></th>
+              <th>Paid On<span class="col-zh">付款日期</span></th>
+              <th>Actions<span class="col-zh">操作</span></th>
+            </tr></thead>
+            <tbody id="inv-tbody"><tr><td colspan="7" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- ══════ WORK PERMITS ══════ -->
-    <div class="tab-panel" id="panel-permits">
+    <!-- ══ QUOTATIONS ══ -->
+    <div class="tab-panel" id="panel-quotations">
       <div class="sec-head">
-        <div class="sec-title">
-          <div class="en">Work Permits</div>
-          <div class="zh">工作准证管理</div>
+        <div class="sec-title"><div class="en">Quotation Management</div><div class="zh">报价单管理</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">➕ Add Quotation <span class="zh">添加报价单</span></div>
+        <div class="form-grid cols-4">
+          <label><div class="lbl-en">Date</div><div class="lbl-zh">日期</div><input type="date" id="qt-date"></label>
+          <label><div class="lbl-en">Quotation Number</div><div class="lbl-zh">报价单号码</div><input type="text" id="qt-number" placeholder="QT-001"></label>
+          <label><div class="lbl-en">Company Name</div><div class="lbl-zh">公司名称</div><input type="text" id="qt-company" placeholder="Company Pte Ltd"></label>
+          <label><div class="lbl-en">Amount (SGD)</div><div class="lbl-zh">金额（新元）</div><input type="number" id="qt-amount" placeholder="0.00" step="0.01" min="0"></label>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="addQuotation()">Add Quotation / 添加报价单</button>
+          <span class="form-err" id="qt-err"></span>
         </div>
       </div>
+      <div class="summary-bar" id="qt-summary"></div>
+      <div class="search-wrap" style="max-width:320px;">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="qt-search" placeholder="Search quotation no. / 搜索报价单号" oninput="setQtSearch(this.value)" autocomplete="off">
+        <button class="search-clear" id="qt-search-clear" onclick="clearQtSearch()">×</button>
+      </div>
+      <div class="controls-row">
+        <div class="filter-bar" id="qt-filters">
+          <button class="filter-btn active" onclick="setQtFilter('all',this)">All / 全部</button>
+          <button class="filter-btn" onclick="setQtFilter('pending',this)">Pending / 待确认</button>
+          <button class="filter-btn" onclick="setQtFilter('accepted',this)">Accepted / 已接受</button>
+        </div>
+        <div class="sort-row">
+          <span class="sort-lbl">Sort / 排序：</span>
+          <button class="sort-btn active" onclick="setQtSort('date',this)">Date / 日期 ↓</button>
+          <button class="sort-btn" onclick="setQtSort('company',this)">Company / 公司 A–Z</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Date<span class="col-zh">日期</span></th>
+              <th>Quotation No.<span class="col-zh">报价单号</span></th>
+              <th>Company<span class="col-zh">公司</span></th>
+              <th>Amount<span class="col-zh">金额</span></th>
+              <th>Status<span class="col-zh">状态</span></th>
+              <th>Accepted On<span class="col-zh">接受日期</span></th>
+              <th>Actions<span class="col-zh">操作</span></th>
+            </tr></thead>
+            <tbody id="qt-tbody"><tr><td colspan="7" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
+    <!-- ══ WORK PERMITS ══ -->
+    <div class="tab-panel" id="panel-permits">
+      <div class="sec-head">
+        <div class="sec-title"><div class="en">Work Permits</div><div class="zh">工作准证管理</div></div>
+      </div>
       <div class="card">
         <div class="card-title">➕ Add Work Permit <span class="zh">添加工作准证</span></div>
         <div class="form-grid cols-3">
-          <label>
-            <div class="lbl-en">Worker Name</div><div class="lbl-zh">员工姓名</div>
-            <input type="text" id="wp-name" placeholder="Full name">
-          </label>
-          <label>
-            <div class="lbl-en">Permit Number</div><div class="lbl-zh">准证号码</div>
-            <input type="text" id="wp-permit" placeholder="WP1234567A">
-          </label>
-          <label>
-            <div class="lbl-en">Expiry Date</div><div class="lbl-zh">到期日</div>
-            <input type="date" id="wp-expiry">
-          </label>
+          <label><div class="lbl-en">Worker Name</div><div class="lbl-zh">员工姓名</div><input type="text" id="wp-name" placeholder="Full name"></label>
+          <label><div class="lbl-en">Permit Number</div><div class="lbl-zh">准证号码</div><input type="text" id="wp-permit" placeholder="WP1234567A"></label>
+          <label><div class="lbl-en">Expiry Date</div><div class="lbl-zh">到期日</div><input type="date" id="wp-expiry"></label>
         </div>
         <div class="form-actions">
           <button class="btn btn-primary" onclick="addPermit()">Add Permit / 添加准证</button>
           <span class="form-err" id="wp-err"></span>
         </div>
       </div>
-
       <div class="card">
         <div class="tbl-wrap">
           <table>
-            <thead>
-              <tr>
-                <th>Worker Name<span class="col-zh">员工姓名</span></th>
-                <th>Permit No.<span class="col-zh">准证号码</span></th>
-                <th>Expiry Date<span class="col-zh">到期日</span></th>
-                <th>Days Left<span class="col-zh">剩余天数</span></th>
-                <th>Actions<span class="col-zh">操作</span></th>
-              </tr>
-            </thead>
-            <tbody id="wp-tbody">
-              <tr><td colspan="5" class="empty"><span class="spinner"></span> Loading...</td></tr>
-            </tbody>
+            <thead><tr>
+              <th>Worker Name<span class="col-zh">员工姓名</span></th>
+              <th>Permit No.<span class="col-zh">准证号码</span></th>
+              <th>Expiry Date<span class="col-zh">到期日</span></th>
+              <th>Days Left<span class="col-zh">剩余天数</span></th>
+              <th>Actions<span class="col-zh">操作</span></th>
+            </tr></thead>
+            <tbody id="wp-tbody"><tr><td colspan="5" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- ══════ ROAD TAX ══════ -->
+    <!-- ══ ROAD TAX ══ -->
     <div class="tab-panel" id="panel-roadtax">
       <div class="sec-head">
-        <div class="sec-title">
-          <div class="en">Road Tax</div>
-          <div class="zh">道路税管理</div>
-        </div>
+        <div class="sec-title"><div class="en">Road Tax</div><div class="zh">道路税管理</div></div>
       </div>
-
       <div class="card">
         <div class="card-title">➕ Add Vehicle <span class="zh">添加车辆</span></div>
         <div class="form-grid cols-3">
-          <label>
-            <div class="lbl-en">Plate Number</div><div class="lbl-zh">车牌号</div>
-            <input type="text" id="rt-plate" placeholder="SBA1234A">
-          </label>
-          <label>
-            <div class="lbl-en">Description</div><div class="lbl-zh">描述</div>
-            <input type="text" id="rt-desc" placeholder="e.g. Company Van">
-          </label>
-          <label>
-            <div class="lbl-en">Expiry Date</div><div class="lbl-zh">到期日</div>
-            <input type="date" id="rt-expiry">
-          </label>
+          <label><div class="lbl-en">Plate Number</div><div class="lbl-zh">车牌号</div><input type="text" id="rt-plate" placeholder="SBA1234A"></label>
+          <label><div class="lbl-en">Description</div><div class="lbl-zh">描述</div><input type="text" id="rt-desc" placeholder="e.g. Company Van"></label>
+          <label><div class="lbl-en">Expiry Date</div><div class="lbl-zh">到期日</div><input type="date" id="rt-expiry"></label>
         </div>
         <div class="form-actions">
           <button class="btn btn-primary" onclick="addRoadTax()">Add Vehicle / 添加车辆</button>
           <span class="form-err" id="rt-err"></span>
         </div>
       </div>
-
       <div class="card">
         <div class="tbl-wrap">
           <table>
-            <thead>
-              <tr>
-                <th>Plate Number<span class="col-zh">车牌号</span></th>
-                <th>Description<span class="col-zh">描述</span></th>
-                <th>Expiry Date<span class="col-zh">到期日</span></th>
-                <th>Days Left<span class="col-zh">剩余天数</span></th>
-                <th>Actions<span class="col-zh">操作</span></th>
-              </tr>
-            </thead>
-            <tbody id="rt-tbody">
-              <tr><td colspan="5" class="empty"><span class="spinner"></span> Loading...</td></tr>
-            </tbody>
+            <thead><tr>
+              <th>Plate Number<span class="col-zh">车牌号</span></th>
+              <th>Description<span class="col-zh">描述</span></th>
+              <th>Expiry Date<span class="col-zh">到期日</span></th>
+              <th>Days Left<span class="col-zh">剩余天数</span></th>
+              <th>Actions<span class="col-zh">操作</span></th>
+            </tr></thead>
+            <tbody id="rt-tbody"><tr><td colspan="5" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- ══════ INSURANCE ══════ -->
+    <!-- ══ INSURANCE ══ -->
     <div class="tab-panel" id="panel-insurance">
       <div class="sec-head">
-        <div class="sec-title">
-          <div class="en">Insurance Policies</div>
-          <div class="zh">保险管理</div>
-        </div>
+        <div class="sec-title"><div class="en">Insurance Policies</div><div class="zh">保险管理</div></div>
       </div>
-
       <div class="card">
         <div class="card-title">➕ Add Policy <span class="zh">添加保险</span></div>
         <div class="form-grid cols-2">
-          <label>
-            <div class="lbl-en">Policy Name</div><div class="lbl-zh">保险名称</div>
-            <input type="text" id="ins-name" placeholder="e.g. Workmen Compensation">
-          </label>
-          <label>
-            <div class="lbl-en">Provider</div><div class="lbl-zh">保险公司</div>
-            <input type="text" id="ins-provider" placeholder="e.g. NTUC Income / FWD / AXA">
-          </label>
-          <label>
-            <div class="lbl-en">Start Date</div><div class="lbl-zh">开始日期</div>
-            <input type="date" id="ins-start">
-          </label>
-          <label>
-            <div class="lbl-en">Expiry Date</div><div class="lbl-zh">到期日</div>
-            <input type="date" id="ins-expiry">
-          </label>
+          <label><div class="lbl-en">Policy Name</div><div class="lbl-zh">保险名称</div><input type="text" id="ins-name" placeholder="e.g. Workmen Compensation"></label>
+          <label><div class="lbl-en">Provider</div><div class="lbl-zh">保险公司</div><input type="text" id="ins-provider" placeholder="e.g. NTUC Income / FWD / AXA"></label>
+          <label><div class="lbl-en">Start Date</div><div class="lbl-zh">开始日期</div><input type="date" id="ins-start"></label>
+          <label><div class="lbl-en">Expiry Date</div><div class="lbl-zh">到期日</div><input type="date" id="ins-expiry"></label>
         </div>
-        <div style="margin-top:14px;">
+        <div style="margin-top:12px;">
           <div class="lbl-en">Notes</div><div class="lbl-zh">备注（可自由填写）</div>
           <textarea id="ins-notes" placeholder="e.g. Covers all workers · Renewed monthly · Contact: John 9123 4567"></textarea>
         </div>
@@ -563,70 +516,48 @@
           <span class="form-err" id="ins-err"></span>
         </div>
       </div>
-
       <div class="card">
         <div class="tbl-wrap">
           <table>
-            <thead>
-              <tr>
-                <th>Policy Name<span class="col-zh">保险名称</span></th>
-                <th>Provider<span class="col-zh">保险公司</span></th>
-                <th>Start<span class="col-zh">开始</span></th>
-                <th>Expiry<span class="col-zh">到期</span></th>
-                <th>Days Left<span class="col-zh">剩余天数</span></th>
-                <th>Notes<span class="col-zh">备注</span></th>
-                <th>Actions<span class="col-zh">操作</span></th>
-              </tr>
-            </thead>
-            <tbody id="ins-tbody">
-              <tr><td colspan="7" class="empty"><span class="spinner"></span> Loading...</td></tr>
-            </tbody>
+            <thead><tr>
+              <th>Policy Name<span class="col-zh">保险名称</span></th>
+              <th>Provider<span class="col-zh">保险公司</span></th>
+              <th>Start<span class="col-zh">开始</span></th>
+              <th>Expiry<span class="col-zh">到期</span></th>
+              <th>Days Left<span class="col-zh">剩余天数</span></th>
+              <th>Notes<span class="col-zh">备注</span></th>
+              <th>Actions<span class="col-zh">操作</span></th>
+            </tr></thead>
+            <tbody id="ins-tbody"><tr><td colspan="7" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- ══════ PRICES ══════ -->
+    <!-- ══ PRICES ══ -->
     <div class="tab-panel" id="panel-prices">
       <div class="sec-head">
-        <div class="sec-title">
-          <div class="en">Reference Prices (Electrical Works)</div>
-          <div class="zh">参考价格（电气工程）</div>
-        </div>
+        <div class="sec-title"><div class="en">Reference Prices (Electrical Works)</div><div class="zh">参考价格（电气工程）</div></div>
       </div>
-
-      <!-- Info card -->
       <div class="info-card">
         <div class="ic-title">📊 How these prices work / 价格数据说明</div>
         <div class="info-grid">
-          <div class="info-point">
-            <span class="info-icon">🤖</span>
-            <div>
-              <div class="info-en">Automatically collected every week</div>
-              <div class="info-zh">每周自动采集一次。系统通过我们自己的 RenoRadar 智能平台，从新加坡多个装修报价来源收集最新价格数据，无需人工操作。</div>
-            </div>
-          </div>
-          <div class="info-point">
-            <span class="info-icon">📡</span>
-            <div>
-              <div class="info-en">Live Singapore market data</div>
-              <div class="info-zh">数据来源于本地新加坡市场的真实报价，反映当前行情，让您随时了解最新的市场参考价格。</div>
-            </div>
-          </div>
-          <div class="info-point">
-            <span class="info-icon">🔒</span>
-            <div>
-              <div class="info-en">Read-only — for reference only</div>
-              <div class="info-zh">此页面仅供参考，数据由系统自动更新，管理员无法手动修改，确保数据的客观性与准确性。</div>
-            </div>
-          </div>
-          <div class="info-point">
-            <span class="info-icon">💡</span>
-            <div>
-              <div class="info-en">Use to check if your quotes are competitive</div>
-              <div class="info-zh">您可以对比这些市场均价，判断公司的报价是否具有竞争力，帮助团队做出更明智的商业决策。</div>
-            </div>
-          </div>
+          <div class="info-point"><span class="info-icon">🤖</span><div>
+            <div class="info-en">Automatically collected every week</div>
+            <div class="info-zh">每周自动采集一次。系统通过 RenoRadar 智能平台从新加坡多个装修报价来源收集最新价格数据，无需人工操作。</div>
+          </div></div>
+          <div class="info-point"><span class="info-icon">📡</span><div>
+            <div class="info-en">Live Singapore market data</div>
+            <div class="info-zh">数据来源于本地新加坡市场的真实报价，反映当前行情，让您随时了解最新市场参考价格。</div>
+          </div></div>
+          <div class="info-point"><span class="info-icon">🔒</span><div>
+            <div class="info-en">Read-only — for reference only</div>
+            <div class="info-zh">此页面仅供参考，数据由系统自动更新，管理员无法手动修改，确保数据的客观性与准确性。</div>
+          </div></div>
+          <div class="info-point"><span class="info-icon">💡</span><div>
+            <div class="info-en">Check if your quotes are competitive</div>
+            <div class="info-zh">您可以对比这些市场均价，判断公司的报价是否具有竞争力，帮助团队做出更明智的商业决策。</div>
+          </div></div>
         </div>
         <div class="tier-legend">
           <div class="tier-item"><span class="tier-label">Budget / 经济</span><span class="tier-desc">— 基本施工，材料标准</span></div>
@@ -635,106 +566,261 @@
           <div class="tier-item"><span class="tier-label">Market Avg / 市场均价</span><span class="tier-desc">— 三档综合平均参考价</span></div>
         </div>
       </div>
-
       <div class="card">
-        <div class="prices-meta" id="prices-meta">
-          <span class="spinner"></span> Loading from RenoRadar / 正在加载参考价格...
-        </div>
+        <div class="prices-meta" id="prices-meta"><span class="spinner"></span> Loading from RenoRadar / 正在加载参考价格...</div>
         <div class="tbl-wrap">
           <table>
-            <thead>
-              <tr>
-                <th>Item<span class="col-zh">项目</span></th>
-                <th>Unit<span class="col-zh">单位</span></th>
-                <th>Budget<span class="col-zh">经济</span></th>
-                <th>Mid-Range<span class="col-zh">中档</span></th>
-                <th>Premium<span class="col-zh">高档</span></th>
-                <th>Market Avg<span class="col-zh">市场均价</span></th>
-              </tr>
-            </thead>
-            <tbody id="prices-tbody">
-              <tr><td colspan="6" class="empty"><span class="spinner"></span></td></tr>
-            </tbody>
+            <thead><tr>
+              <th>Item<span class="col-zh">项目</span></th>
+              <th>Unit<span class="col-zh">单位</span></th>
+              <th>Budget<span class="col-zh">经济</span></th>
+              <th>Mid-Range<span class="col-zh">中档</span></th>
+              <th>Premium<span class="col-zh">高档</span></th>
+              <th>Market Avg<span class="col-zh">市场均价</span></th>
+            </tr></thead>
+            <tbody id="prices-tbody"><tr><td colspan="6" class="empty"><span class="spinner"></span></td></tr></tbody>
           </table>
         </div>
       </div>
     </div>
 
+    <!-- ══ LICENSING INVOICES ══ -->
+    <div class="tab-panel" id="panel-licensing">
+      <div class="sec-head">
+        <div class="sec-title"><div class="en">Licensing Invoices</div><div class="zh">牌照发票管理</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">➕ Add Licensing Invoice <span class="zh">添加牌照发票</span></div>
+        <div class="form-grid cols-4">
+          <label><div class="lbl-en">Date</div><div class="lbl-zh">日期</div><input type="date" id="li-date"></label>
+          <label><div class="lbl-en">Invoice Number</div><div class="lbl-zh">发票号码</div><input type="text" id="li-number" placeholder="LIC-001"></label>
+          <label><div class="lbl-en">Company Name</div><div class="lbl-zh">公司名称</div><input type="text" id="li-company" placeholder="Company Pte Ltd"></label>
+          <label><div class="lbl-en">Amount (SGD)</div><div class="lbl-zh">金额（新元）</div><input type="number" id="li-amount" placeholder="0.00" step="0.01" min="0"></label>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="addLicensing()">Add Invoice / 添加发票</button>
+          <span class="form-err" id="li-err"></span>
+        </div>
+      </div>
+      <div class="summary-bar" id="li-summary"></div>
+      <div class="search-wrap" style="max-width:320px;">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="li-search" placeholder="Search invoice no. / 搜索发票号" oninput="setLiSearch(this.value)" autocomplete="off">
+        <button class="search-clear" id="li-search-clear" onclick="clearLiSearch()">×</button>
+      </div>
+      <div class="controls-row">
+        <div class="filter-bar" id="li-filters">
+          <button class="filter-btn active" onclick="setLiFilter('all',this)">All / 全部</button>
+          <button class="filter-btn" onclick="setLiFilter('unpaid',this)">Unpaid / 未付款</button>
+          <button class="filter-btn" onclick="setLiFilter('paid',this)">Paid / 已付款</button>
+        </div>
+        <div class="sort-row">
+          <span class="sort-lbl">Sort / 排序：</span>
+          <button class="sort-btn active" onclick="setLiSort('date',this)">Date / 日期 ↓</button>
+          <button class="sort-btn" onclick="setLiSort('company',this)">Company / 公司 A–Z</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Date<span class="col-zh">日期</span></th>
+              <th>Invoice No.<span class="col-zh">发票号</span></th>
+              <th>Company<span class="col-zh">公司</span></th>
+              <th>Amount<span class="col-zh">金额</span></th>
+              <th>Status<span class="col-zh">状态</span></th>
+              <th>Paid On<span class="col-zh">付款日期</span></th>
+              <th>Actions<span class="col-zh">操作</span></th>
+            </tr></thead>
+            <tbody id="li-tbody"><tr><td colspan="7" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ HOW TO USE ══ -->
+    <div class="tab-panel" id="panel-howto">
+      <div class="howto-intro">
+        <h2>📖 使用说明</h2>
+        <p>欢迎使用 Evergrow Electrical Service 管理系统。本系统专供公司管理人员使用，方便您随时随地通过手机或电脑查看和更新公司重要资料。所有资料均实时同步，全体管理人员看到的数据始终保持一致。</p>
+      </div>
+      <div class="howto-grid">
+        <div class="howto-card">
+          <h3>🔐 登录与登出</h3>
+          <ul>
+            <li>使用公司统一密码登录系统</li>
+            <li>登录后，会话将保持有效，直到您点击右上角的"登出"按钮</li>
+            <li>如果关闭浏览器，下次需重新输入密码</li>
+            <li>所有管理员使用同一个密码，无需各自注册账号</li>
+          </ul>
+        </div>
+        <div class="howto-card">
+          <h3>🧾 发票管理（Invoices）</h3>
+          <ul>
+            <li>此页面用于记录公司向客户开出的<strong>普通发票</strong></li>
+            <li>填写日期、发票号码、公司名称和金额，点击"添加发票"即可保存</li>
+            <li>收到付款后，点击"标记付款"，系统自动记录付款日期</li>
+            <li>可按全部 / 未付款 / 已付款筛选记录</li>
+            <li>可按日期或公司名称排序</li>
+            <li>使用搜索框可快速找到特定发票号码</li>
+            <li>顶部数字栏显示发票总额、已收款和未收款金额</li>
+          </ul>
+        </div>
+        <div class="howto-card">
+          <h3>📋 报价单管理（Quotations）</h3>
+          <ul>
+            <li>此页面用于记录公司发出的<strong>报价单</strong></li>
+            <li>操作方式与发票页面完全相同</li>
+            <li>默认状态为"待确认"，客户确认后点击"标记已接受"</li>
+            <li>系统自动记录客户接受日期</li>
+            <li>可按全部 / 待确认 / 已接受筛选，支持排序和搜索</li>
+          </ul>
+        </div>
+        <div class="howto-card">
+          <h3>📄 牌照发票（Licensing Invoices）</h3>
+          <ul>
+            <li>此页面专门用于记录与<strong>牌照相关</strong>的发票</li>
+            <li>与普通发票完全分开，方便单独追踪牌照费用</li>
+            <li>操作方式与发票页面完全相同</li>
+            <li>同样支持筛选、排序和发票号搜索功能</li>
+          </ul>
+        </div>
+        <div class="howto-card">
+          <h3>👷 工作准证（Work Permits）</h3>
+          <ul>
+            <li>记录所有工人的工作准证号码及到期日</li>
+            <li>填写工人姓名、准证号码和到期日期即可添加</li>
+            <li>系统自动计算剩余天数，并以颜色提醒：</li>
+          </ul>
+          <div class="badge-legend">
+            <span class="badge badge-urgent">⚠ 30天内到期（紧急）</span>
+            <span class="badge badge-soon">⚡ 31–60天（尽快续签）</span>
+            <span class="badge badge-ok">状态良好</span>
+          </div>
+        </div>
+        <div class="howto-card">
+          <h3>🚗 道路税（Road Tax）</h3>
+          <ul>
+            <li>记录公司所有车辆的道路税到期日</li>
+            <li>填写车牌号码、车辆描述和到期日期</li>
+            <li>颜色提醒系统与工作准证相同</li>
+            <li>车牌号码输入后会自动转为大写字母</li>
+          </ul>
+        </div>
+        <div class="howto-card">
+          <h3>🛡️ 保险（Insurance）</h3>
+          <ul>
+            <li>记录公司所有保险单的详细信息</li>
+            <li>可填写保险名称、保险公司、开始日期、到期日期</li>
+            <li>备注栏可自由填写任何内容，例如联系人电话、续保方式等</li>
+            <li>颜色提醒系统与工作准证相同</li>
+          </ul>
+        </div>
+        <div class="howto-card">
+          <h3>💰 参考价格（Prices）</h3>
+          <ul>
+            <li>显示电气工程的新加坡市场参考价格</li>
+            <li>数据由系统每周自动采集，无需人工操作</li>
+            <li>分为经济 / 中档 / 高档 三个价格档次及市场均价</li>
+            <li>仅供参考，此页面无法手动修改任何数据</li>
+          </ul>
+        </div>
+      </div>
+      <div class="howto-card" style="margin-top:4px;">
+        <h3>🔔 顶部警报与标签提示</h3>
+        <ul>
+          <li>当有工作准证、道路税或保险在 <strong>30天内到期</strong> 时，页面顶部会出现<span style="color:#991B1B;font-weight:600;">红色警报栏</span>，列出所有紧急项目</li>
+          <li>相关标签页名称旁边会出现一个<span style="color:#DC2626;font-weight:600;">红色小圆点</span>，方便您快速定位哪个类别需要处理</li>
+          <li>小圆点出现表示该类别有项目将在 60 天内到期，请及时跟进</li>
+        </ul>
+      </div>
+      <div class="howto-card">
+        <h3>🗑️ 删除记录</h3>
+        <ul>
+          <li>每条记录右侧均有"Delete / 删除"按钮</li>
+          <li>点击后系统会弹出确认提示，请确认后再删除</li>
+          <li><strong>删除后无法恢复，请谨慎操作</strong></li>
+        </ul>
+      </div>
+    </div>
+
   </main>
-</div><!-- #app -->
+</div>
 
 <script>
-// ── CONFIG ────────────────────────────────────────────────────────────────────
 const SB_URL     = 'https://wimlphbdiborlwikjfdi.supabase.co';
 const SB_KEY     = 'sb_publishable_VTpMm2_t79Klsy-RjyVJEA_vhGpo_Np';
 const PW_HASH    = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
 const PRICES_URL = 'https://adamdegoat.github.io/renoradar/data/electrical.json';
 
-const SETUP_SQL = `-- Run this in Supabase SQL Editor → New Query → Paste → Run
-
-CREATE TABLE invoices (
-  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  date          date NOT NULL,
-  invoice_number text NOT NULL,
-  company_name  text NOT NULL,
-  amount        numeric(10,2) NOT NULL,
-  status        text DEFAULT 'unpaid',
-  paid_date     date,
-  created_at    timestamptz DEFAULT now()
+const SETUP_SQL = `CREATE TABLE invoices (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  date date NOT NULL, invoice_number text NOT NULL,
+  company_name text NOT NULL, amount numeric(10,2) NOT NULL,
+  status text DEFAULT 'unpaid', paid_date date,
+  created_at timestamptz DEFAULT now()
+);
+CREATE TABLE quotations (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  date date NOT NULL, quotation_number text NOT NULL,
+  company_name text NOT NULL, amount numeric(10,2) NOT NULL,
+  status text DEFAULT 'pending', accepted_date date,
+  created_at timestamptz DEFAULT now()
 );
 CREATE TABLE work_permits (
-  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  worker_name   text NOT NULL,
-  permit_number text NOT NULL,
-  expiry_date   date NOT NULL,
-  created_at    timestamptz DEFAULT now()
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  worker_name text NOT NULL, permit_number text NOT NULL,
+  expiry_date date NOT NULL, created_at timestamptz DEFAULT now()
 );
 CREATE TABLE road_tax (
-  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  plate_number  text NOT NULL,
-  description   text,
-  expiry_date   date NOT NULL,
-  created_at    timestamptz DEFAULT now()
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  plate_number text NOT NULL, description text,
+  expiry_date date NOT NULL, created_at timestamptz DEFAULT now()
 );
 CREATE TABLE insurance_policies (
-  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  policy_name   text NOT NULL,
-  provider      text NOT NULL,
-  start_date    date NOT NULL,
-  expiry_date   date NOT NULL,
-  notes         text,
-  created_at    timestamptz DEFAULT now()
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  policy_name text NOT NULL, provider text NOT NULL,
+  start_date date NOT NULL, expiry_date date NOT NULL,
+  notes text, created_at timestamptz DEFAULT now()
+);
+CREATE TABLE licensing_invoices (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  date date NOT NULL, invoice_number text NOT NULL,
+  company_name text NOT NULL, amount numeric(10,2) NOT NULL,
+  status text DEFAULT 'unpaid', paid_date date,
+  created_at timestamptz DEFAULT now()
 );
 ALTER TABLE invoices           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE quotations         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE work_permits       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE road_tax           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE insurance_policies ENABLE ROW LEVEL SECURITY;
+ALTER TABLE licensing_invoices ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "allow_all" ON invoices           FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "allow_all" ON quotations         FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "allow_all" ON work_permits       FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "allow_all" ON road_tax           FOR ALL TO anon USING (true) WITH CHECK (true);
-CREATE POLICY "allow_all" ON insurance_policies FOR ALL TO anon USING (true) WITH CHECK (true);`;
+CREATE POLICY "allow_all" ON insurance_policies FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "allow_all" ON licensing_invoices FOR ALL TO anon USING (true) WITH CHECK (true);`;
 
-// ── SUPABASE ──────────────────────────────────────────────────────────────────
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
-// ── STATE ─────────────────────────────────────────────────────────────────────
-let invoices = [], permits = [], roadtaxes = [], insurances = [];
-let invFilter = 'all';
-let invSort   = 'date';
-let invSearch = '';
-let dbReady = false;
+// STATE
+let invoices = [], quotations = [], permits = [], roadtaxes = [], insurances = [], licensing = [];
+let invFilter = 'all', invSort = 'date', invSearch = '';
+let qtFilter  = 'all', qtSort  = 'date', qtSearch  = '';
+let liFilter  = 'all', liSort  = 'date', liSearch  = '';
 
-// ── AUTH ──────────────────────────────────────────────────────────────────────
+// AUTH
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
-
 async function doLogin() {
   const pw = document.getElementById('pw-input').value;
   const h  = await sha256(pw);
   if (h === PW_HASH) {
-    sessionStorage.setItem('eg_auth', '1');
+    sessionStorage.setItem('eg_auth','1');
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     initApp();
@@ -744,15 +830,15 @@ async function doLogin() {
     setTimeout(() => { el.textContent = ''; }, 3000);
   }
 }
+function doLogout() { sessionStorage.removeItem('eg_auth'); location.reload(); }
 
-function doLogout() {
-  sessionStorage.removeItem('eg_auth');
-  location.reload();
-}
-
-// ── BOOT ──────────────────────────────────────────────────────────────────────
+// BOOT
 window.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('inv-date').valueAsDate = new Date();
+  const today = new Date();
+  ['inv-date','qt-date','li-date'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.valueAsDate = today;
+  });
   if (sessionStorage.getItem('eg_auth') === '1') {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
@@ -761,25 +847,19 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 async function initApp() {
-  // Check if DB tables exist first
   const { error: chk } = await sb.from('invoices').select('id').limit(1);
   if (chk) {
-    const code = chk.code || '';
-    const msg  = chk.message || '';
+    const code = chk.code || '', msg = chk.message || '';
     if (code === '42P01' || msg.includes('does not exist') || msg.includes('relation')) {
       document.getElementById('setup-banner').style.display = 'block';
-      // Fill empty tables with setup instructions
-      const noDb = `<tr><td colspan="99" class="empty" style="color:#B45309">
-        Database not ready — please run the setup SQL above. / 请先运行上方设置SQL。
-      </td></tr>`;
-      ['inv-tbody','wp-tbody','rt-tbody','ins-tbody'].forEach(id => {
+      const noDb = `<tr><td colspan="99" class="empty" style="color:#B45309">Database not ready — please run the setup SQL above. / 请先运行上方设置SQL。</td></tr>`;
+      ['inv-tbody','qt-tbody','wp-tbody','rt-tbody','ins-tbody','li-tbody'].forEach(id => {
         document.getElementById(id).innerHTML = noDb;
       });
       return;
     }
   }
-  dbReady = true;
-  await Promise.all([loadInvoices(), loadPermits(), loadRoadTax(), loadInsurance()]);
+  await Promise.all([loadInvoices(), loadQuotations(), loadPermits(), loadRoadTax(), loadInsurance(), loadLicensing()]);
   loadPrices();
   refreshAlerts();
 }
@@ -792,7 +872,7 @@ function copySetupSql() {
   });
 }
 
-// ── TABS ──────────────────────────────────────────────────────────────────────
+// TABS
 function showTab(name, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -800,12 +880,8 @@ function showTab(name, btn) {
   btn.classList.add('active');
 }
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
-function daysUntil(dateStr) {
-  if (!dateStr) return null;
-  return Math.round((new Date(dateStr) - new Date()) / 86400000);
-}
-
+// HELPERS
+function daysUntil(d) { if (!d) return null; return Math.round((new Date(d) - new Date()) / 86400000); }
 function expiryBadge(days) {
   if (days === null) return '—';
   if (days < 0)   return `<span class="badge badge-expired">Expired / 已过期</span>`;
@@ -813,387 +889,330 @@ function expiryBadge(days) {
   if (days <= 60) return `<span class="badge badge-soon">⚡ ${days}d / 天</span>`;
   return `<span class="badge badge-ok">${days}d / 天</span>`;
 }
-
 function fmtDate(d) {
   if (!d) return '—';
-  const [y, m, day] = d.split('-');
-  const mo = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return `${parseInt(day)} ${mo[parseInt(m)]} ${y}`;
+  const [y,m,day] = d.split('-');
+  return `${parseInt(day)} ${['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)]} ${y}`;
 }
-
-function escH(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
+function escH(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function showErr(id, msg) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.textContent = msg;
-  el.style.display = 'inline';
+  const el = document.getElementById(id); if (!el) return;
+  el.textContent = msg; el.style.display = 'inline';
   setTimeout(() => { el.style.display = 'none'; el.textContent = ''; }, 5000);
 }
+function dbErr(errId, error) {
+  if (error.code === '42P01' || (error.message||'').includes('does not exist')) {
+    showErr(errId, 'Database not set up. / 数据库未配置。');
+    document.getElementById('setup-banner').style.display = 'block';
+  } else { showErr(errId, 'Error: ' + error.message); }
+}
+function sortRows(rows, sort) {
+  if (sort === 'company') rows.sort((a,b) => a.company_name.localeCompare(b.company_name));
+  else rows.sort((a,b) => (b.date > a.date ? 1 : b.date < a.date ? -1 : 0));
+  return rows;
+}
 
-// ── ALERTS + DOTS ─────────────────────────────────────────────────────────────
+// ALERTS + DOTS
 function refreshAlerts() {
   const msgs = [];
-  permits.forEach(p => {
-    const d = daysUntil(p.expiry_date);
-    if (d !== null && d <= 30)
-      msgs.push(`${escH(p.worker_name)}'s WP (${d < 0 ? 'EXPIRED' : d + 'd'})`);
-  });
-  roadtaxes.forEach(r => {
-    const d = daysUntil(r.expiry_date);
-    if (d !== null && d <= 30)
-      msgs.push(`Road tax ${escH(r.plate_number)} (${d < 0 ? 'EXPIRED' : d + 'd'})`);
-  });
-  insurances.forEach(i => {
-    const d = daysUntil(i.expiry_date);
-    if (d !== null && d <= 30)
-      msgs.push(`Insurance: ${escH(i.policy_name)} (${d < 0 ? 'EXPIRED' : d + 'd'})`);
-  });
-
+  permits.forEach(p => { const d = daysUntil(p.expiry_date); if (d !== null && d <= 30) msgs.push(`${escH(p.worker_name)}'s WP (${d < 0 ? 'EXPIRED' : d+'d'})`); });
+  roadtaxes.forEach(r => { const d = daysUntil(r.expiry_date); if (d !== null && d <= 30) msgs.push(`Road tax ${escH(r.plate_number)} (${d < 0 ? 'EXPIRED' : d+'d'})`); });
+  insurances.forEach(i => { const d = daysUntil(i.expiry_date); if (d !== null && d <= 30) msgs.push(`Insurance: ${escH(i.policy_name)} (${d < 0 ? 'EXPIRED' : d+'d'})`); });
   const bar = document.getElementById('alert-bar');
-  if (msgs.length) {
-    document.getElementById('alert-text').innerHTML = msgs.join(' &nbsp;·&nbsp; ');
-    bar.style.display = 'flex';
-  } else {
-    bar.style.display = 'none';
-  }
-
+  if (msgs.length) { document.getElementById('alert-text').innerHTML = msgs.join(' &nbsp;·&nbsp; '); bar.style.display = 'flex'; }
+  else bar.style.display = 'none';
   function setDot(id, show) {
-    const btn = document.getElementById('tabn-' + id);
-    if (!btn) return;
+    const btn = document.getElementById('tabn-'+id); if (!btn) return;
     const ex = btn.querySelector('.tab-dot');
-    if (show && !ex) { const d = document.createElement('span'); d.className = 'tab-dot'; btn.appendChild(d); }
+    if (show && !ex) { const d = document.createElement('span'); d.className='tab-dot'; btn.appendChild(d); }
     else if (!show && ex) ex.remove();
   }
-  setDot('permits',   permits.some(p   => { const d = daysUntil(p.expiry_date);   return d !== null && d <= 60; }));
-  setDot('roadtax',   roadtaxes.some(r => { const d = daysUntil(r.expiry_date);   return d !== null && d <= 60; }));
-  setDot('insurance', insurances.some(i => { const d = daysUntil(i.expiry_date); return d !== null && d <= 60; }));
+  setDot('permits',   permits.some(p   => { const d=daysUntil(p.expiry_date);   return d!==null&&d<=60; }));
+  setDot('roadtax',   roadtaxes.some(r => { const d=daysUntil(r.expiry_date);   return d!==null&&d<=60; }));
+  setDot('insurance', insurances.some(i => { const d=daysUntil(i.expiry_date); return d!==null&&d<=60; }));
 }
 
-// ── INVOICES ──────────────────────────────────────────────────────────────────
+// ── INVOICES ──
 async function loadInvoices() {
-  const { data, error } = await sb.from('invoices').select('*').order('date', { ascending: false });
-  if (error) { console.error('invoices:', error); return; }
-  invoices = data || [];
-  renderInvoices();
-  renderInvSummary();
+  const { data, error } = await sb.from('invoices').select('*').order('date',{ascending:false});
+  if (error) { console.error(error); return; }
+  invoices = data || []; renderInvoices(); renderInvSummary();
 }
-
 function renderInvSummary() {
-  const total   = invoices.reduce((s, i) => s + parseFloat(i.amount), 0);
-  const paid    = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + parseFloat(i.amount), 0);
-  const unpaid  = total - paid;
-  const nUnpaid = invoices.filter(i => i.status === 'unpaid').length;
+  const total = invoices.reduce((s,i)=>s+parseFloat(i.amount),0);
+  const paid  = invoices.filter(i=>i.status==='paid').reduce((s,i)=>s+parseFloat(i.amount),0);
   document.getElementById('inv-summary').innerHTML = `
     <div class="sum-item"><div class="sum-val">$${total.toFixed(2)}</div><div class="sum-lbl">Total Invoiced</div><div class="sum-lbl-zh">发票总额</div></div>
     <div class="sum-item"><div class="sum-val" style="color:#059669">$${paid.toFixed(2)}</div><div class="sum-lbl">Collected</div><div class="sum-lbl-zh">已收款</div></div>
-    <div class="sum-item"><div class="sum-val" style="color:#DC2626">$${unpaid.toFixed(2)}</div><div class="sum-lbl">Outstanding</div><div class="sum-lbl-zh">未收款</div></div>
-    <div class="sum-item"><div class="sum-val">${invoices.length}</div><div class="sum-lbl">Total Invoices</div><div class="sum-lbl-zh">发票总数</div></div>
-    <div class="sum-item"><div class="sum-val" style="color:#DC2626">${nUnpaid}</div><div class="sum-lbl">Unpaid</div><div class="sum-lbl-zh">未付款</div></div>
-  `;
+    <div class="sum-item"><div class="sum-val" style="color:#DC2626">$${(total-paid).toFixed(2)}</div><div class="sum-lbl">Outstanding</div><div class="sum-lbl-zh">未收款</div></div>
+    <div class="sum-item"><div class="sum-val">${invoices.length}</div><div class="sum-lbl">Total</div><div class="sum-lbl-zh">总数</div></div>
+    <div class="sum-item"><div class="sum-val" style="color:#DC2626">${invoices.filter(i=>i.status==='unpaid').length}</div><div class="sum-lbl">Unpaid</div><div class="sum-lbl-zh">未付款</div></div>`;
 }
-
-function setInvFilter(f, btn) {
-  invFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderInvoices();
-}
-
-function setInvSort(s, btn) {
-  invSort = s;
-  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderInvoices();
-}
-
-function setInvSearch(val) {
-  invSearch = val.trim().toLowerCase();
-  document.getElementById('inv-search-clear').style.display = invSearch ? 'block' : 'none';
-  renderInvoices();
-}
-
-function clearInvSearch() {
-  invSearch = '';
-  document.getElementById('inv-search').value = '';
-  document.getElementById('inv-search-clear').style.display = 'none';
-  renderInvoices();
-}
-
+function setInvFilter(f,btn) { invFilter=f; btn.closest('.filter-bar').querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderInvoices(); }
+function setInvSort(s,btn)   { invSort=s;  btn.closest('.sort-row').querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderInvoices(); }
+function setInvSearch(v) { invSearch=v.trim().toLowerCase(); document.getElementById('inv-search-clear').style.display=invSearch?'block':'none'; renderInvoices(); }
+function clearInvSearch() { invSearch=''; document.getElementById('inv-search').value=''; document.getElementById('inv-search-clear').style.display='none'; renderInvoices(); }
 function renderInvoices() {
-  let rows = invFilter === 'all' ? invoices.slice() : invoices.filter(i => i.status === invFilter);
-  if (invSearch) rows = rows.filter(i => i.invoice_number.toLowerCase().includes(invSearch));
-  if (invSort === 'company') {
-    rows.sort((a, b) => a.company_name.localeCompare(b.company_name));
-  } else {
-    rows.sort((a, b) => (b.date > a.date ? 1 : b.date < a.date ? -1 : 0));
-  }
+  let rows = (invFilter==='all'?invoices.slice():invoices.filter(i=>i.status===invFilter));
+  if (invSearch) rows=rows.filter(i=>i.invoice_number.toLowerCase().includes(invSearch));
+  rows = sortRows(rows, invSort);
   const tbody = document.getElementById('inv-tbody');
-  if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="empty">No invoices / 暂无发票</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = rows.map(inv => `
-    <tr>
-      <td>${fmtDate(inv.date)}</td>
-      <td><strong>${escH(inv.invoice_number)}</strong></td>
-      <td>${escH(inv.company_name)}</td>
-      <td><strong>$${parseFloat(inv.amount).toFixed(2)}</strong></td>
-      <td><span class="badge ${inv.status==='paid'?'badge-paid':'badge-unpaid'}">${inv.status==='paid'?'Paid / 已付款':'Unpaid / 未付款'}</span></td>
-      <td>${fmtDate(inv.paid_date)}</td>
-      <td class="td-actions">
-        ${inv.status==='unpaid' ? `<button class="btn btn-success btn-sm" onclick="markPaid('${inv.id}')">Mark Paid / 标记付款</button>` : ''}
-        <button class="btn btn-danger btn-sm" onclick="delInvoice('${inv.id}')">Delete / 删除</button>
-      </td>
-    </tr>
-  `).join('');
+  if (!rows.length) { tbody.innerHTML=`<tr><td colspan="7" class="empty">No invoices / 暂无发票</td></tr>`; return; }
+  tbody.innerHTML = rows.map(r=>`<tr>
+    <td>${fmtDate(r.date)}</td><td><strong>${escH(r.invoice_number)}</strong></td><td>${escH(r.company_name)}</td>
+    <td><strong>$${parseFloat(r.amount).toFixed(2)}</strong></td>
+    <td><span class="badge ${r.status==='paid'?'badge-paid':'badge-unpaid'}">${r.status==='paid'?'Paid / 已付款':'Unpaid / 未付款'}</span></td>
+    <td>${fmtDate(r.paid_date)}</td>
+    <td class="td-actions">${r.status==='unpaid'?`<button class="btn btn-success btn-sm" onclick="markInvPaid('${r.id}')">Mark Paid / 标记付款</button>`:''}<button class="btn btn-danger btn-sm" onclick="delInvoice('${r.id}')">Delete / 删除</button></td>
+  </tr>`).join('');
 }
-
 async function addInvoice() {
-  const date           = document.getElementById('inv-date').value;
-  const invoice_number = document.getElementById('inv-number').value.trim();
-  const company_name   = document.getElementById('inv-company').value.trim();
-  const amount         = parseFloat(document.getElementById('inv-amount').value);
-  if (!date || !invoice_number || !company_name || isNaN(amount) || amount <= 0) {
-    showErr('inv-err', 'Please fill in all fields. / 请填写所有字段。'); return;
-  }
-  const { error } = await sb.from('invoices').insert({ date, invoice_number, company_name, amount, status: 'unpaid' });
-  if (error) {
-    if (error.code === '42P01' || (error.message || '').includes('does not exist')) {
-      showErr('inv-err', 'Database not set up yet. Please run the setup SQL. / 数据库未配置。');
-      document.getElementById('setup-banner').style.display = 'block';
-    } else {
-      showErr('inv-err', 'Error: ' + error.message);
-    }
-    return;
-  }
-  document.getElementById('inv-number').value = '';
-  document.getElementById('inv-company').value = '';
-  document.getElementById('inv-amount').value = '';
+  const date=document.getElementById('inv-date').value, invoice_number=document.getElementById('inv-number').value.trim(),
+        company_name=document.getElementById('inv-company').value.trim(), amount=parseFloat(document.getElementById('inv-amount').value);
+  if (!date||!invoice_number||!company_name||isNaN(amount)||amount<=0) { showErr('inv-err','Please fill in all fields. / 请填写所有字段。'); return; }
+  const {error}=await sb.from('invoices').insert({date,invoice_number,company_name,amount,status:'unpaid'});
+  if (error) { dbErr('inv-err',error); return; }
+  document.getElementById('inv-number').value=''; document.getElementById('inv-company').value=''; document.getElementById('inv-amount').value='';
   await loadInvoices();
 }
-
-async function markPaid(id) {
-  const today = new Date().toISOString().split('T')[0];
-  const { error } = await sb.from('invoices').update({ status: 'paid', paid_date: today }).eq('id', id);
-  if (error) { showErr('inv-err', 'Error: ' + error.message); return; }
-  await loadInvoices();
+async function markInvPaid(id) {
+  const today=new Date().toISOString().split('T')[0];
+  const {error}=await sb.from('invoices').update({status:'paid',paid_date:today}).eq('id',id);
+  if (error) { showErr('inv-err','Error: '+error.message); return; } await loadInvoices();
 }
-
 async function delInvoice(id) {
   if (!confirm('Delete this invoice? / 确认删除此发票？')) return;
-  const { error } = await sb.from('invoices').delete().eq('id', id);
-  if (error) { showErr('inv-err', 'Error: ' + error.message); return; }
-  await loadInvoices();
+  const {error}=await sb.from('invoices').delete().eq('id',id);
+  if (error) { showErr('inv-err','Error: '+error.message); return; } await loadInvoices();
 }
 
-// ── WORK PERMITS ──────────────────────────────────────────────────────────────
+// ── QUOTATIONS ──
+async function loadQuotations() {
+  const {data,error}=await sb.from('quotations').select('*').order('date',{ascending:false});
+  if (error) { console.error(error); return; }
+  quotations=data||[]; renderQuotations(); renderQtSummary();
+}
+function renderQtSummary() {
+  const total=quotations.reduce((s,i)=>s+parseFloat(i.amount),0);
+  const accepted=quotations.filter(i=>i.status==='accepted').reduce((s,i)=>s+parseFloat(i.amount),0);
+  document.getElementById('qt-summary').innerHTML = `
+    <div class="sum-item"><div class="sum-val">$${total.toFixed(2)}</div><div class="sum-lbl">Total Quoted</div><div class="sum-lbl-zh">报价总额</div></div>
+    <div class="sum-item"><div class="sum-val" style="color:#059669">$${accepted.toFixed(2)}</div><div class="sum-lbl">Accepted</div><div class="sum-lbl-zh">已接受</div></div>
+    <div class="sum-item"><div class="sum-val" style="color:#1E40AF">$${(total-accepted).toFixed(2)}</div><div class="sum-lbl">Pending</div><div class="sum-lbl-zh">待确认</div></div>
+    <div class="sum-item"><div class="sum-val">${quotations.length}</div><div class="sum-lbl">Total</div><div class="sum-lbl-zh">总数</div></div>
+    <div class="sum-item"><div class="sum-val" style="color:#1E40AF">${quotations.filter(i=>i.status==='pending').length}</div><div class="sum-lbl">Pending</div><div class="sum-lbl-zh">待确认</div></div>`;
+}
+function setQtFilter(f,btn) { qtFilter=f; btn.closest('.filter-bar').querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderQuotations(); }
+function setQtSort(s,btn)   { qtSort=s;  btn.closest('.sort-row').querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderQuotations(); }
+function setQtSearch(v) { qtSearch=v.trim().toLowerCase(); document.getElementById('qt-search-clear').style.display=qtSearch?'block':'none'; renderQuotations(); }
+function clearQtSearch() { qtSearch=''; document.getElementById('qt-search').value=''; document.getElementById('qt-search-clear').style.display='none'; renderQuotations(); }
+function renderQuotations() {
+  let rows=(qtFilter==='all'?quotations.slice():quotations.filter(i=>i.status===qtFilter));
+  if (qtSearch) rows=rows.filter(i=>i.quotation_number.toLowerCase().includes(qtSearch));
+  rows=sortRows(rows,qtSort);
+  const tbody=document.getElementById('qt-tbody');
+  if (!rows.length) { tbody.innerHTML=`<tr><td colspan="7" class="empty">No quotations / 暂无报价单</td></tr>`; return; }
+  tbody.innerHTML=rows.map(r=>`<tr>
+    <td>${fmtDate(r.date)}</td><td><strong>${escH(r.quotation_number)}</strong></td><td>${escH(r.company_name)}</td>
+    <td><strong>$${parseFloat(r.amount).toFixed(2)}</strong></td>
+    <td><span class="badge ${r.status==='accepted'?'badge-accepted':'badge-pending'}">${r.status==='accepted'?'Accepted / 已接受':'Pending / 待确认'}</span></td>
+    <td>${fmtDate(r.accepted_date)}</td>
+    <td class="td-actions">${r.status==='pending'?`<button class="btn btn-success btn-sm" onclick="markQtAccepted('${r.id}')">Mark Accepted / 标记已接受</button>`:''}<button class="btn btn-danger btn-sm" onclick="delQuotation('${r.id}')">Delete / 删除</button></td>
+  </tr>`).join('');
+}
+async function addQuotation() {
+  const date=document.getElementById('qt-date').value, quotation_number=document.getElementById('qt-number').value.trim(),
+        company_name=document.getElementById('qt-company').value.trim(), amount=parseFloat(document.getElementById('qt-amount').value);
+  if (!date||!quotation_number||!company_name||isNaN(amount)||amount<=0) { showErr('qt-err','Please fill in all fields. / 请填写所有字段。'); return; }
+  const {error}=await sb.from('quotations').insert({date,quotation_number,company_name,amount,status:'pending'});
+  if (error) { dbErr('qt-err',error); return; }
+  document.getElementById('qt-number').value=''; document.getElementById('qt-company').value=''; document.getElementById('qt-amount').value='';
+  await loadQuotations();
+}
+async function markQtAccepted(id) {
+  const today=new Date().toISOString().split('T')[0];
+  const {error}=await sb.from('quotations').update({status:'accepted',accepted_date:today}).eq('id',id);
+  if (error) { showErr('qt-err','Error: '+error.message); return; } await loadQuotations();
+}
+async function delQuotation(id) {
+  if (!confirm('Delete this quotation? / 确认删除此报价单？')) return;
+  const {error}=await sb.from('quotations').delete().eq('id',id);
+  if (error) { showErr('qt-err','Error: '+error.message); return; } await loadQuotations();
+}
+
+// ── WORK PERMITS ──
 async function loadPermits() {
-  const { data, error } = await sb.from('work_permits').select('*').order('expiry_date');
-  if (error) { console.error('permits:', error); return; }
-  permits = data || [];
-  renderPermits();
+  const {data,error}=await sb.from('work_permits').select('*').order('expiry_date');
+  if (error) { console.error(error); return; }
+  permits=data||[]; renderPermits();
 }
-
 function renderPermits() {
-  const tbody = document.getElementById('wp-tbody');
-  if (!permits.length) {
-    tbody.innerHTML = `<tr><td colspan="5" class="empty">No permits on record / 暂无准证记录</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = permits.map(p => `
-    <tr>
-      <td><strong>${escH(p.worker_name)}</strong></td>
-      <td>${escH(p.permit_number)}</td>
-      <td>${fmtDate(p.expiry_date)}</td>
-      <td>${expiryBadge(daysUntil(p.expiry_date))}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="delPermit('${p.id}')">Delete / 删除</button></td>
-    </tr>
-  `).join('');
+  const tbody=document.getElementById('wp-tbody');
+  if (!permits.length) { tbody.innerHTML=`<tr><td colspan="5" class="empty">No permits on record / 暂无准证记录</td></tr>`; return; }
+  tbody.innerHTML=permits.map(p=>`<tr>
+    <td><strong>${escH(p.worker_name)}</strong></td><td>${escH(p.permit_number)}</td>
+    <td>${fmtDate(p.expiry_date)}</td><td>${expiryBadge(daysUntil(p.expiry_date))}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="delPermit('${p.id}')">Delete / 删除</button></td>
+  </tr>`).join('');
 }
-
 async function addPermit() {
-  const worker_name   = document.getElementById('wp-name').value.trim();
-  const permit_number = document.getElementById('wp-permit').value.trim();
-  const expiry_date   = document.getElementById('wp-expiry').value;
-  if (!worker_name || !permit_number || !expiry_date) {
-    showErr('wp-err', 'Please fill in all fields. / 请填写所有字段。'); return;
-  }
-  const { error } = await sb.from('work_permits').insert({ worker_name, permit_number, expiry_date });
-  if (error) {
-    if (error.code === '42P01' || (error.message || '').includes('does not exist')) {
-      showErr('wp-err', 'Database not set up yet. / 数据库未配置。');
-      document.getElementById('setup-banner').style.display = 'block';
-    } else {
-      showErr('wp-err', 'Error: ' + error.message);
-    }
-    return;
-  }
-  document.getElementById('wp-name').value = '';
-  document.getElementById('wp-permit').value = '';
-  document.getElementById('wp-expiry').value = '';
+  const worker_name=document.getElementById('wp-name').value.trim(),
+        permit_number=document.getElementById('wp-permit').value.trim(),
+        expiry_date=document.getElementById('wp-expiry').value;
+  if (!worker_name||!permit_number||!expiry_date) { showErr('wp-err','Please fill in all fields. / 请填写所有字段。'); return; }
+  const {error}=await sb.from('work_permits').insert({worker_name,permit_number,expiry_date});
+  if (error) { dbErr('wp-err',error); return; }
+  document.getElementById('wp-name').value=''; document.getElementById('wp-permit').value=''; document.getElementById('wp-expiry').value='';
   await loadPermits(); refreshAlerts();
 }
-
 async function delPermit(id) {
   if (!confirm('Delete this permit? / 确认删除此准证？')) return;
-  const { error } = await sb.from('work_permits').delete().eq('id', id);
-  if (error) { showErr('wp-err', 'Error: ' + error.message); return; }
+  const {error}=await sb.from('work_permits').delete().eq('id',id);
+  if (error) { showErr('wp-err','Error: '+error.message); return; }
   await loadPermits(); refreshAlerts();
 }
 
-// ── ROAD TAX ──────────────────────────────────────────────────────────────────
+// ── ROAD TAX ──
 async function loadRoadTax() {
-  const { data, error } = await sb.from('road_tax').select('*').order('expiry_date');
-  if (error) { console.error('road_tax:', error); return; }
-  roadtaxes = data || [];
-  renderRoadTax();
+  const {data,error}=await sb.from('road_tax').select('*').order('expiry_date');
+  if (error) { console.error(error); return; }
+  roadtaxes=data||[]; renderRoadTax();
 }
-
 function renderRoadTax() {
-  const tbody = document.getElementById('rt-tbody');
-  if (!roadtaxes.length) {
-    tbody.innerHTML = `<tr><td colspan="5" class="empty">No vehicles on record / 暂无车辆记录</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = roadtaxes.map(r => `
-    <tr>
-      <td><strong>${escH(r.plate_number)}</strong></td>
-      <td>${r.description ? escH(r.description) : '—'}</td>
-      <td>${fmtDate(r.expiry_date)}</td>
-      <td>${expiryBadge(daysUntil(r.expiry_date))}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="delRoadTax('${r.id}')">Delete / 删除</button></td>
-    </tr>
-  `).join('');
+  const tbody=document.getElementById('rt-tbody');
+  if (!roadtaxes.length) { tbody.innerHTML=`<tr><td colspan="5" class="empty">No vehicles on record / 暂无车辆记录</td></tr>`; return; }
+  tbody.innerHTML=roadtaxes.map(r=>`<tr>
+    <td><strong>${escH(r.plate_number)}</strong></td><td>${r.description?escH(r.description):'—'}</td>
+    <td>${fmtDate(r.expiry_date)}</td><td>${expiryBadge(daysUntil(r.expiry_date))}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="delRoadTax('${r.id}')">Delete / 删除</button></td>
+  </tr>`).join('');
 }
-
 async function addRoadTax() {
-  const plate_number = document.getElementById('rt-plate').value.trim().toUpperCase();
-  const description  = document.getElementById('rt-desc').value.trim();
-  const expiry_date  = document.getElementById('rt-expiry').value;
-  if (!plate_number || !expiry_date) {
-    showErr('rt-err', 'Plate number and expiry date required. / 请填写车牌号和到期日。'); return;
-  }
-  const { error } = await sb.from('road_tax').insert({ plate_number, description, expiry_date });
-  if (error) {
-    if (error.code === '42P01' || (error.message || '').includes('does not exist')) {
-      showErr('rt-err', 'Database not set up yet. / 数据库未配置。');
-      document.getElementById('setup-banner').style.display = 'block';
-    } else {
-      showErr('rt-err', 'Error: ' + error.message);
-    }
-    return;
-  }
-  document.getElementById('rt-plate').value = '';
-  document.getElementById('rt-desc').value = '';
-  document.getElementById('rt-expiry').value = '';
+  const plate_number=document.getElementById('rt-plate').value.trim().toUpperCase(),
+        description=document.getElementById('rt-desc').value.trim(),
+        expiry_date=document.getElementById('rt-expiry').value;
+  if (!plate_number||!expiry_date) { showErr('rt-err','Plate number and expiry date required. / 请填写车牌号和到期日。'); return; }
+  const {error}=await sb.from('road_tax').insert({plate_number,description,expiry_date});
+  if (error) { dbErr('rt-err',error); return; }
+  document.getElementById('rt-plate').value=''; document.getElementById('rt-desc').value=''; document.getElementById('rt-expiry').value='';
   await loadRoadTax(); refreshAlerts();
 }
-
 async function delRoadTax(id) {
   if (!confirm('Delete this vehicle? / 确认删除此车辆？')) return;
-  const { error } = await sb.from('road_tax').delete().eq('id', id);
-  if (error) { showErr('rt-err', 'Error: ' + error.message); return; }
+  const {error}=await sb.from('road_tax').delete().eq('id',id);
+  if (error) { showErr('rt-err','Error: '+error.message); return; }
   await loadRoadTax(); refreshAlerts();
 }
 
-// ── INSURANCE ─────────────────────────────────────────────────────────────────
+// ── INSURANCE ──
 async function loadInsurance() {
-  const { data, error } = await sb.from('insurance_policies').select('*').order('expiry_date');
-  if (error) { console.error('insurance:', error); return; }
-  insurances = data || [];
-  renderInsurance();
+  const {data,error}=await sb.from('insurance_policies').select('*').order('expiry_date');
+  if (error) { console.error(error); return; }
+  insurances=data||[]; renderInsurance();
 }
-
 function renderInsurance() {
-  const tbody = document.getElementById('ins-tbody');
-  if (!insurances.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="empty">No policies on record / 暂无保险记录</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = insurances.map(i => `
-    <tr>
-      <td><strong>${escH(i.policy_name)}</strong></td>
-      <td>${escH(i.provider)}</td>
-      <td>${fmtDate(i.start_date)}</td>
-      <td>${fmtDate(i.expiry_date)}</td>
-      <td>${expiryBadge(daysUntil(i.expiry_date))}</td>
-      <td style="max-width:200px;font-size:0.8rem;color:var(--muted)">${i.notes ? escH(i.notes) : '—'}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="delInsurance('${i.id}')">Delete / 删除</button></td>
-    </tr>
-  `).join('');
+  const tbody=document.getElementById('ins-tbody');
+  if (!insurances.length) { tbody.innerHTML=`<tr><td colspan="7" class="empty">No policies on record / 暂无保险记录</td></tr>`; return; }
+  tbody.innerHTML=insurances.map(i=>`<tr>
+    <td><strong>${escH(i.policy_name)}</strong></td><td>${escH(i.provider)}</td>
+    <td>${fmtDate(i.start_date)}</td><td>${fmtDate(i.expiry_date)}</td>
+    <td>${expiryBadge(daysUntil(i.expiry_date))}</td>
+    <td style="max-width:180px;font-size:0.79rem;color:var(--muted)">${i.notes?escH(i.notes):'—'}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="delInsurance('${i.id}')">Delete / 删除</button></td>
+  </tr>`).join('');
 }
-
 async function addInsurance() {
-  const policy_name = document.getElementById('ins-name').value.trim();
-  const provider    = document.getElementById('ins-provider').value.trim();
-  const start_date  = document.getElementById('ins-start').value;
-  const expiry_date = document.getElementById('ins-expiry').value;
-  const notes       = document.getElementById('ins-notes').value.trim();
-  if (!policy_name || !provider || !start_date || !expiry_date) {
-    showErr('ins-err', 'Please fill in all required fields. / 请填写必填字段。'); return;
-  }
-  const { error } = await sb.from('insurance_policies').insert({ policy_name, provider, start_date, expiry_date, notes });
-  if (error) {
-    if (error.code === '42P01' || (error.message || '').includes('does not exist')) {
-      showErr('ins-err', 'Database not set up yet. / 数据库未配置。');
-      document.getElementById('setup-banner').style.display = 'block';
-    } else {
-      showErr('ins-err', 'Error: ' + error.message);
-    }
-    return;
-  }
-  document.getElementById('ins-name').value = '';
-  document.getElementById('ins-provider').value = '';
-  document.getElementById('ins-start').value = '';
-  document.getElementById('ins-expiry').value = '';
-  document.getElementById('ins-notes').value = '';
+  const policy_name=document.getElementById('ins-name').value.trim(),
+        provider=document.getElementById('ins-provider').value.trim(),
+        start_date=document.getElementById('ins-start').value,
+        expiry_date=document.getElementById('ins-expiry').value,
+        notes=document.getElementById('ins-notes').value.trim();
+  if (!policy_name||!provider||!start_date||!expiry_date) { showErr('ins-err','Please fill in all required fields. / 请填写必填字段。'); return; }
+  const {error}=await sb.from('insurance_policies').insert({policy_name,provider,start_date,expiry_date,notes});
+  if (error) { dbErr('ins-err',error); return; }
+  document.getElementById('ins-name').value=''; document.getElementById('ins-provider').value='';
+  document.getElementById('ins-start').value=''; document.getElementById('ins-expiry').value=''; document.getElementById('ins-notes').value='';
   await loadInsurance(); refreshAlerts();
 }
-
 async function delInsurance(id) {
   if (!confirm('Delete this policy? / 确认删除此保险？')) return;
-  const { error } = await sb.from('insurance_policies').delete().eq('id', id);
-  if (error) { showErr('ins-err', 'Error: ' + error.message); return; }
+  const {error}=await sb.from('insurance_policies').delete().eq('id',id);
+  if (error) { showErr('ins-err','Error: '+error.message); return; }
   await loadInsurance(); refreshAlerts();
 }
 
-// ── PRICES ────────────────────────────────────────────────────────────────────
+// ── LICENSING INVOICES ──
+async function loadLicensing() {
+  const {data,error}=await sb.from('licensing_invoices').select('*').order('date',{ascending:false});
+  if (error) { console.error(error); return; }
+  licensing=data||[]; renderLicensing(); renderLiSummary();
+}
+function renderLiSummary() {
+  const total=licensing.reduce((s,i)=>s+parseFloat(i.amount),0);
+  const paid=licensing.filter(i=>i.status==='paid').reduce((s,i)=>s+parseFloat(i.amount),0);
+  document.getElementById('li-summary').innerHTML = `
+    <div class="sum-item"><div class="sum-val">$${total.toFixed(2)}</div><div class="sum-lbl">Total</div><div class="sum-lbl-zh">发票总额</div></div>
+    <div class="sum-item"><div class="sum-val" style="color:#059669">$${paid.toFixed(2)}</div><div class="sum-lbl">Collected</div><div class="sum-lbl-zh">已收款</div></div>
+    <div class="sum-item"><div class="sum-val" style="color:#DC2626">$${(total-paid).toFixed(2)}</div><div class="sum-lbl">Outstanding</div><div class="sum-lbl-zh">未收款</div></div>
+    <div class="sum-item"><div class="sum-val">${licensing.length}</div><div class="sum-lbl">Total</div><div class="sum-lbl-zh">总数</div></div>
+    <div class="sum-item"><div class="sum-val" style="color:#DC2626">${licensing.filter(i=>i.status==='unpaid').length}</div><div class="sum-lbl">Unpaid</div><div class="sum-lbl-zh">未付款</div></div>`;
+}
+function setLiFilter(f,btn) { liFilter=f; btn.closest('.filter-bar').querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderLicensing(); }
+function setLiSort(s,btn)   { liSort=s;  btn.closest('.sort-row').querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderLicensing(); }
+function setLiSearch(v) { liSearch=v.trim().toLowerCase(); document.getElementById('li-search-clear').style.display=liSearch?'block':'none'; renderLicensing(); }
+function clearLiSearch() { liSearch=''; document.getElementById('li-search').value=''; document.getElementById('li-search-clear').style.display='none'; renderLicensing(); }
+function renderLicensing() {
+  let rows=(liFilter==='all'?licensing.slice():licensing.filter(i=>i.status===liFilter));
+  if (liSearch) rows=rows.filter(i=>i.invoice_number.toLowerCase().includes(liSearch));
+  rows=sortRows(rows,liSort);
+  const tbody=document.getElementById('li-tbody');
+  if (!rows.length) { tbody.innerHTML=`<tr><td colspan="7" class="empty">No licensing invoices / 暂无牌照发票</td></tr>`; return; }
+  tbody.innerHTML=rows.map(r=>`<tr>
+    <td>${fmtDate(r.date)}</td><td><strong>${escH(r.invoice_number)}</strong></td><td>${escH(r.company_name)}</td>
+    <td><strong>$${parseFloat(r.amount).toFixed(2)}</strong></td>
+    <td><span class="badge ${r.status==='paid'?'badge-paid':'badge-unpaid'}">${r.status==='paid'?'Paid / 已付款':'Unpaid / 未付款'}</span></td>
+    <td>${fmtDate(r.paid_date)}</td>
+    <td class="td-actions">${r.status==='unpaid'?`<button class="btn btn-success btn-sm" onclick="markLiPaid('${r.id}')">Mark Paid / 标记付款</button>`:''}<button class="btn btn-danger btn-sm" onclick="delLicensing('${r.id}')">Delete / 删除</button></td>
+  </tr>`).join('');
+}
+async function addLicensing() {
+  const date=document.getElementById('li-date').value, invoice_number=document.getElementById('li-number').value.trim(),
+        company_name=document.getElementById('li-company').value.trim(), amount=parseFloat(document.getElementById('li-amount').value);
+  if (!date||!invoice_number||!company_name||isNaN(amount)||amount<=0) { showErr('li-err','Please fill in all fields. / 请填写所有字段。'); return; }
+  const {error}=await sb.from('licensing_invoices').insert({date,invoice_number,company_name,amount,status:'unpaid'});
+  if (error) { dbErr('li-err',error); return; }
+  document.getElementById('li-number').value=''; document.getElementById('li-company').value=''; document.getElementById('li-amount').value='';
+  await loadLicensing();
+}
+async function markLiPaid(id) {
+  const today=new Date().toISOString().split('T')[0];
+  const {error}=await sb.from('licensing_invoices').update({status:'paid',paid_date:today}).eq('id',id);
+  if (error) { showErr('li-err','Error: '+error.message); return; } await loadLicensing();
+}
+async function delLicensing(id) {
+  if (!confirm('Delete this licensing invoice? / 确认删除此牌照发票？')) return;
+  const {error}=await sb.from('licensing_invoices').delete().eq('id',id);
+  if (error) { showErr('li-err','Error: '+error.message); return; } await loadLicensing();
+}
+
+// ── PRICES ──
 async function loadPrices() {
   try {
-    const res = await fetch(PRICES_URL);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-
-    document.getElementById('prices-meta').innerHTML =
-      `Source: RenoRadar &nbsp;·&nbsp; Last Updated: <strong>${data.last_updated || '—'}</strong>
-       &nbsp;|&nbsp; 来源：市场价格参考 &nbsp;·&nbsp; 最后更新：<strong>${data.last_updated || '—'}</strong>`;
-
-    const items = Object.values(data.items || {});
-    if (!items.length) {
-      document.getElementById('prices-tbody').innerHTML =
-        `<tr><td colspan="6" class="empty">No price data / 暂无价格数据</td></tr>`;
-      return;
-    }
-    document.getElementById('prices-tbody').innerHTML = items.map(it => `
-      <tr>
-        <td><strong>${escH(it.name)}</strong></td>
-        <td style="color:var(--muted)">${escH(it.unit)}</td>
-        <td>$${it.tier_budget.min}–$${it.tier_budget.max}</td>
-        <td>$${it.tier_mid.min}–$${it.tier_mid.max}</td>
-        <td>$${it.tier_premium.min}–$${it.tier_premium.max}</td>
-        <td class="avg-cell">$${it.market_avg}</td>
-      </tr>
-    `).join('');
-  } catch (e) {
-    document.getElementById('prices-meta').textContent = 'Prices not yet available / 价格暂未更新';
-    document.getElementById('prices-tbody').innerHTML =
-      `<tr><td colspan="6" class="empty" style="color:var(--muted)">
-        Run the RenoRadar weekly update to populate this tab.<br>
-        <span style="font-family:'Noto Sans SC',sans-serif;font-size:0.85em">请先运行RenoRadar每周更新以载入价格。</span>
-      </td></tr>`;
+    const res=await fetch(PRICES_URL); if (!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    document.getElementById('prices-meta').innerHTML=`Source: RenoRadar &nbsp;·&nbsp; Last Updated: <strong>${data.last_updated||'—'}</strong> &nbsp;|&nbsp; 来源：市场价格参考 &nbsp;·&nbsp; 最后更新：<strong>${data.last_updated||'—'}</strong>`;
+    const items=Object.values(data.items||{});
+    if (!items.length) { document.getElementById('prices-tbody').innerHTML=`<tr><td colspan="6" class="empty">No price data / 暂无价格数据</td></tr>`; return; }
+    document.getElementById('prices-tbody').innerHTML=items.map(it=>`<tr>
+      <td><strong>${escH(it.name)}</strong></td><td style="color:var(--muted)">${escH(it.unit)}</td>
+      <td>$${it.tier_budget.min}–$${it.tier_budget.max}</td>
+      <td>$${it.tier_mid.min}–$${it.tier_mid.max}</td>
+      <td>$${it.tier_premium.min}–$${it.tier_premium.max}</td>
+      <td class="avg-cell">$${it.market_avg}</td>
+    </tr>`).join('');
+  } catch(e) {
+    document.getElementById('prices-meta').textContent='Prices not yet available / 价格暂未更新';
+    document.getElementById('prices-tbody').innerHTML=`<tr><td colspan="6" class="empty" style="color:var(--muted)">Run the RenoRadar weekly update to populate this tab.<br><span style="font-family:'Noto Sans SC',sans-serif;font-size:0.85em">请先运行RenoRadar每周更新以载入价格。</span></td></tr>`;
   }
 }
 </script>
