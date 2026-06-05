@@ -225,9 +225,34 @@
     .sum-lbl { font-size: 0.73rem; color: var(--muted); margin-top: 3px; font-weight: 500; }
     .sum-lbl-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.66rem; color: #94A3B8; }
 
+    /* ── SORT BUTTONS ── */
+    .sort-btn {
+      padding: 5px 12px; border: 1.5px solid var(--border); border-radius: 20px;
+      background: var(--card); color: var(--muted); cursor: pointer; font-size: 0.78rem;
+      font-family: 'Inter', sans-serif; transition: all 0.15s;
+    }
+    .sort-btn:hover { border-color: var(--yellow); color: var(--yellow-dark); }
+    .sort-btn.active { border-color: var(--yellow); color: var(--yellow-dark); background: #FFFBEB; font-weight: 600; }
+
     /* ── PRICES ── */
     .prices-meta { font-size: 0.82rem; color: var(--muted); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
     .avg-cell { font-weight: 700; color: var(--yellow-dark); }
+    .info-card {
+      background: #FFFBEB; border: 1.5px solid #FDE68A; border-radius: 14px;
+      padding: 20px 24px; margin-bottom: 20px;
+    }
+    .info-card .ic-title { font-weight: 700; font-size: 0.95rem; color: #78350F; margin-bottom: 12px; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
+    .info-point { display: flex; gap: 10px; align-items: flex-start; }
+    .info-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+    .info-en { font-size: 0.84rem; font-weight: 600; color: #78350F; line-height: 1.4; }
+    .info-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.74rem; color: #92400E; margin-top: 2px; line-height: 1.5; }
+    .tier-legend { margin-top: 16px; padding-top: 14px; border-top: 1px solid #FDE68A; display: flex; gap: 20px; flex-wrap: wrap; }
+    .tier-item { font-size: 0.8rem; }
+    .tier-label { font-weight: 600; color: #78350F; }
+    .tier-desc { color: #92400E; margin-left: 4px; }
+    .tier-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.7rem; color: #A16207; }
 
     /* ── EMPTY / SPINNER ── */
     .empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 0.88rem; }
@@ -355,10 +380,17 @@
 
       <div class="summary-bar" id="inv-summary"></div>
 
-      <div class="filter-bar">
-        <button class="filter-btn active" onclick="setInvFilter('all',this)">All / 全部</button>
-        <button class="filter-btn" onclick="setInvFilter('unpaid',this)">Unpaid / 未付款</button>
-        <button class="filter-btn" onclick="setInvFilter('paid',this)">Paid / 已付款</button>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+        <div class="filter-bar" style="margin-bottom:0;flex:1;min-width:200px;">
+          <button class="filter-btn active" onclick="setInvFilter('all',this)">All / 全部</button>
+          <button class="filter-btn" onclick="setInvFilter('unpaid',this)">Unpaid / 未付款</button>
+          <button class="filter-btn" onclick="setInvFilter('paid',this)">Paid / 已付款</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;white-space:nowrap;">
+          <span style="font-size:0.78rem;color:var(--muted);font-weight:500;">Sort / 排序：</span>
+          <button class="sort-btn active" id="sort-date" onclick="setInvSort('date',this)">Date / 日期 ↓</button>
+          <button class="sort-btn" id="sort-company" onclick="setInvSort('company',this)">Company / 公司 A–Z</button>
+        </div>
       </div>
 
       <div class="card">
@@ -555,6 +587,47 @@
         </div>
       </div>
 
+      <!-- Info card -->
+      <div class="info-card">
+        <div class="ic-title">📊 How these prices work / 价格数据说明</div>
+        <div class="info-grid">
+          <div class="info-point">
+            <span class="info-icon">🤖</span>
+            <div>
+              <div class="info-en">Automatically collected every week</div>
+              <div class="info-zh">每周自动采集一次。系统通过我们自己的 RenoRadar 智能平台，从新加坡多个装修报价来源收集最新价格数据，无需人工操作。</div>
+            </div>
+          </div>
+          <div class="info-point">
+            <span class="info-icon">📡</span>
+            <div>
+              <div class="info-en">Live Singapore market data</div>
+              <div class="info-zh">数据来源于本地新加坡市场的真实报价，反映当前行情，让您随时了解最新的市场参考价格。</div>
+            </div>
+          </div>
+          <div class="info-point">
+            <span class="info-icon">🔒</span>
+            <div>
+              <div class="info-en">Read-only — for reference only</div>
+              <div class="info-zh">此页面仅供参考，数据由系统自动更新，管理员无法手动修改，确保数据的客观性与准确性。</div>
+            </div>
+          </div>
+          <div class="info-point">
+            <span class="info-icon">💡</span>
+            <div>
+              <div class="info-en">Use to check if your quotes are competitive</div>
+              <div class="info-zh">您可以对比这些市场均价，判断公司的报价是否具有竞争力，帮助团队做出更明智的商业决策。</div>
+            </div>
+          </div>
+        </div>
+        <div class="tier-legend">
+          <div class="tier-item"><span class="tier-label">Budget / 经济</span><span class="tier-desc">— 基本施工，材料标准</span></div>
+          <div class="tier-item"><span class="tier-label">Mid-Range / 中档</span><span class="tier-desc">— 良好品质，市场主流</span></div>
+          <div class="tier-item"><span class="tier-label">Premium / 高档</span><span class="tier-desc">— 优质材料，高端施工</span></div>
+          <div class="tier-item"><span class="tier-label">Market Avg / 市场均价</span><span class="tier-desc">— 三档综合平均参考价</span></div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="prices-meta" id="prices-meta">
           <span class="spinner"></span> Loading from RenoRadar / 正在加载参考价格...
@@ -639,6 +712,7 @@ const sb = supabase.createClient(SB_URL, SB_KEY);
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let invoices = [], permits = [], roadtaxes = [], insurances = [];
 let invFilter = 'all';
+let invSort   = 'date';
 let dbReady = false;
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
@@ -819,8 +893,20 @@ function setInvFilter(f, btn) {
   renderInvoices();
 }
 
+function setInvSort(s, btn) {
+  invSort = s;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderInvoices();
+}
+
 function renderInvoices() {
-  const rows = invFilter === 'all' ? invoices : invoices.filter(i => i.status === invFilter);
+  let rows = invFilter === 'all' ? invoices.slice() : invoices.filter(i => i.status === invFilter);
+  if (invSort === 'company') {
+    rows.sort((a, b) => a.company_name.localeCompare(b.company_name));
+  } else {
+    rows.sort((a, b) => (b.date > a.date ? 1 : b.date < a.date ? -1 : 0));
+  }
   const tbody = document.getElementById('inv-tbody');
   if (!rows.length) {
     tbody.innerHTML = `<tr><td colspan="7" class="empty">No invoices / 暂无发票</td></tr>`;
