@@ -8,9 +8,18 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     :root {
-      --bg: #0D1B2A; --card: #122236; --card2: #1a2f45;
-      --yellow: #F59E0B; --green: #10B981; --red: #EF4444; --amber: #F59E0B;
-      --text: #E2E8F0; --muted: #94A3B8; --border: #1E3A5F;
+      --bg: #F1F5F9;
+      --card: #FFFFFF;
+      --card2: #F8FAFC;
+      --yellow: #F59E0B;
+      --yellow-dark: #D97706;
+      --green: #059669;
+      --red: #DC2626;
+      --text: #1E293B;
+      --muted: #64748B;
+      --border: #E2E8F0;
+      --shadow: 0 1px 4px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
@@ -18,51 +27,73 @@
     /* ── LOGIN ── */
     #login-screen {
       display: flex; align-items: center; justify-content: center;
-      min-height: 100vh;
+      min-height: 100vh; background: var(--bg);
     }
     .login-card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-      padding: 48px 40px; width: 360px; text-align: center;
+      background: var(--card); border-radius: 20px; box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      padding: 48px 40px; width: 380px; text-align: center;
     }
-    .login-card h1 { font-size: 1.25rem; font-weight: 700; margin: 20px 0 4px; }
+    .login-card h1 { font-size: 1.25rem; font-weight: 700; color: var(--text); margin: 18px 0 4px; }
     .login-card .sub-zh {
       font-family: 'Noto Sans SC', sans-serif; font-size: 0.88rem; color: var(--muted); margin-bottom: 32px;
     }
     .login-card input {
-      width: 100%; padding: 12px 16px; background: var(--bg); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--text); font-size: 1rem; margin-bottom: 14px; outline: none;
-      font-family: 'Inter', sans-serif;
+      width: 100%; padding: 12px 16px; background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 10px; color: var(--text); font-size: 1rem; margin-bottom: 14px; outline: none;
+      font-family: 'Inter', sans-serif; transition: border-color 0.15s;
     }
-    .login-card input:focus { border-color: var(--yellow); }
+    .login-card input:focus { border-color: var(--yellow); background: #fff; }
     .login-card .login-btn {
-      width: 100%; padding: 12px; background: var(--yellow); color: #0D1B2A;
-      font-weight: 700; font-size: 1rem; border: none; border-radius: 8px; cursor: pointer;
+      width: 100%; padding: 13px; background: var(--yellow); color: #fff;
+      font-weight: 700; font-size: 1rem; border: none; border-radius: 10px; cursor: pointer;
       display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 2px 8px rgba(245,158,11,0.3);
     }
-    .login-card .login-btn:hover { opacity: 0.9; }
+    .login-card .login-btn:hover { background: var(--yellow-dark); }
     .login-error { color: var(--red); font-size: 0.83rem; margin-top: 12px; min-height: 18px; }
+    .logo-ring { display: flex; justify-content: center; margin-bottom: 4px; }
 
     /* ── APP ── */
     #app { display: none; }
 
+    /* ── DB SETUP BANNER ── */
+    #setup-banner {
+      background: #FFFBEB; border-bottom: 2px solid #F59E0B;
+      padding: 16px 24px; display: none;
+    }
+    #setup-banner .sb-title {
+      font-weight: 700; color: #92400E; font-size: 0.95rem; margin-bottom: 6px;
+    }
+    #setup-banner .sb-body { font-size: 0.84rem; color: #78350F; line-height: 1.6; }
+    #setup-banner .sb-steps { margin: 10px 0 0 16px; font-size: 0.83rem; color: #78350F; }
+    #setup-banner .sb-steps li { margin-bottom: 4px; }
+    #setup-banner .copy-btn {
+      margin-top: 12px; padding: 7px 16px; background: var(--yellow); color: #fff;
+      border: none; border-radius: 8px; cursor: pointer; font-size: 0.82rem; font-weight: 600;
+    }
+    #setup-banner .copy-btn:hover { background: var(--yellow-dark); }
+
     /* ── ALERT BAR ── */
     #alert-bar {
-      background: #3B0A0A; border-bottom: 2px solid var(--red);
+      background: #FEF2F2; border-bottom: 2px solid #FECACA;
       padding: 10px 24px; align-items: center; gap: 10px; font-size: 0.84rem;
       display: none; flex-wrap: wrap;
     }
-    #alert-bar strong { color: #FCA5A5; }
+    #alert-bar strong { color: #991B1B; }
+    #alert-bar span { color: #B91C1C; }
 
     /* ── HEADER ── */
     header {
       background: var(--card); border-bottom: 1px solid var(--border);
       padding: 0 24px; display: flex; align-items: center; height: 64px; gap: 16px;
+      box-shadow: var(--shadow-sm);
     }
-    .hdr-name { font-weight: 700; font-size: 1rem; line-height: 1.2; }
+    .hdr-name { font-weight: 700; font-size: 1rem; line-height: 1.2; color: var(--text); }
     .hdr-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.73rem; color: var(--muted); }
     .logout-btn {
-      margin-left: auto; background: transparent; border: 1px solid var(--border);
+      margin-left: auto; background: transparent; border: 1.5px solid var(--border);
       color: var(--muted); padding: 7px 16px; border-radius: 8px; cursor: pointer; font-size: 0.8rem;
+      transition: all 0.15s;
     }
     .logout-btn:hover { border-color: var(--red); color: var(--red); }
 
@@ -73,17 +104,19 @@
     }
     nav::-webkit-scrollbar { height: 0; }
     .tab-btn {
-      padding: 12px 18px; border: none; background: none; color: var(--muted);
+      padding: 13px 20px; border: none; background: none; color: var(--muted);
       cursor: pointer; border-bottom: 3px solid transparent;
-      white-space: nowrap; position: relative; display: flex; align-items: center; gap: 6px;
-      flex-direction: column; align-items: flex-start;
+      white-space: nowrap; position: relative; display: flex;
+      flex-direction: column; align-items: flex-start; transition: color 0.15s;
     }
+    .tab-btn:hover { color: var(--text); }
     .tab-en { font-size: 0.88rem; font-weight: 500; }
-    .tab-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.68rem; color: var(--muted); line-height: 1; }
-    .tab-btn.active { color: var(--yellow); border-bottom-color: var(--yellow); }
-    .tab-btn.active .tab-zh { color: rgba(245,158,11,0.7); }
+    .tab-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.67rem; color: var(--muted); line-height: 1.2; }
+    .tab-btn.active { color: var(--yellow-dark); border-bottom-color: var(--yellow); }
+    .tab-btn.active .tab-en { font-weight: 600; }
+    .tab-btn.active .tab-zh { color: #92400E; }
     .tab-dot {
-      position: absolute; top: 8px; right: 6px;
+      position: absolute; top: 9px; right: 6px;
       width: 7px; height: 7px; border-radius: 50%; background: var(--red);
     }
 
@@ -97,100 +130,104 @@
       display: flex; align-items: flex-end; justify-content: space-between;
       margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
     }
-    .sec-title .en { font-size: 1.2rem; font-weight: 700; }
+    .sec-title .en { font-size: 1.2rem; font-weight: 700; color: var(--text); }
     .sec-title .zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
 
     /* ── CARD ── */
     .card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-      padding: 20px; margin-bottom: 20px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 22px; margin-bottom: 20px; box-shadow: var(--shadow-sm);
     }
     .card-title {
-      font-weight: 600; font-size: 0.95rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+      font-weight: 600; font-size: 0.95rem; margin-bottom: 18px;
+      display: flex; align-items: center; gap: 8px; color: var(--text);
     }
     .card-title .zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.75rem; color: var(--muted); font-weight: 400; }
 
     /* ── FORM ── */
-    .form-grid { display: grid; gap: 12px; }
+    .form-grid { display: grid; gap: 14px; }
     .cols-2 { grid-template-columns: 1fr 1fr; }
     .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
     .cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
     @media (max-width: 780px) {
       .cols-2, .cols-3, .cols-4 { grid-template-columns: 1fr; }
     }
-    .form-actions { margin-top: 14px; }
-    .lbl-en { font-size: 0.8rem; font-weight: 500; margin-bottom: 3px; }
+    .form-actions { margin-top: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .lbl-en { font-size: 0.8rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
     .lbl-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.68rem; color: var(--muted); margin-bottom: 5px; }
     input[type=text], input[type=date], input[type=number], textarea, select {
-      width: 100%; padding: 9px 12px; background: var(--bg); border: 1px solid var(--border);
+      width: 100%; padding: 9px 12px; background: var(--bg); border: 1.5px solid var(--border);
       border-radius: 8px; color: var(--text); font-size: 0.88rem; font-family: 'Inter', sans-serif;
-      outline: none; transition: border-color 0.15s;
+      outline: none; transition: border-color 0.15s, background 0.15s;
     }
-    input:focus, textarea:focus, select:focus { border-color: var(--yellow); }
-    textarea { resize: vertical; min-height: 76px; }
-    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+    input:focus, textarea:focus, select:focus { border-color: var(--yellow); background: #fff; }
+    textarea { resize: vertical; min-height: 80px; }
+    .form-err { font-size: 0.8rem; color: var(--red); display: none; }
 
     /* ── BUTTONS ── */
     .btn {
       padding: 9px 18px; border: none; border-radius: 8px; cursor: pointer;
       font-size: 0.84rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', sans-serif; transition: opacity 0.15s, background 0.15s;
     }
-    .btn-primary { background: var(--yellow); color: #0D1B2A; }
-    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary { background: var(--yellow); color: #fff; box-shadow: 0 1px 4px rgba(245,158,11,0.25); }
+    .btn-primary:hover { background: var(--yellow-dark); }
     .btn-success { background: var(--green); color: #fff; }
     .btn-success:hover { opacity: 0.88; }
-    .btn-danger { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
-    .btn-danger:hover { background: rgba(239,68,68,0.25); }
-    .btn-sm { padding: 5px 10px; font-size: 0.76rem; }
+    .btn-danger { background: #FEF2F2; color: var(--red); border: 1.5px solid #FECACA; }
+    .btn-danger:hover { background: #FEE2E2; }
+    .btn-sm { padding: 5px 11px; font-size: 0.76rem; }
 
     /* ── FILTER ── */
     .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
     .filter-btn {
-      padding: 5px 14px; border: 1px solid var(--border); border-radius: 20px;
-      background: transparent; color: var(--muted); cursor: pointer; font-size: 0.8rem;
-      font-family: 'Inter', sans-serif;
+      padding: 5px 16px; border: 1.5px solid var(--border); border-radius: 20px;
+      background: var(--card); color: var(--muted); cursor: pointer; font-size: 0.8rem;
+      font-family: 'Inter', sans-serif; transition: all 0.15s;
     }
-    .filter-btn.active { border-color: var(--yellow); color: var(--yellow); background: rgba(245,158,11,0.08); }
+    .filter-btn:hover { border-color: var(--yellow); color: var(--yellow-dark); }
+    .filter-btn.active { border-color: var(--yellow); color: var(--yellow-dark); background: #FFFBEB; font-weight: 600; }
 
     /* ── TABLE ── */
     .tbl-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
     th {
-      text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border);
-      color: var(--muted); font-weight: 500; white-space: nowrap;
+      text-align: left; padding: 10px 14px; border-bottom: 2px solid var(--border);
+      color: var(--muted); font-weight: 600; white-space: nowrap; background: var(--card2);
     }
-    .col-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.66rem; display: block; font-weight: 400; color: #64748B; }
-    td { padding: 10px 12px; border-bottom: 1px solid rgba(30,58,95,0.4); vertical-align: middle; }
+    th:first-child { border-radius: 8px 0 0 0; }
+    th:last-child  { border-radius: 0 8px 0 0; }
+    .col-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.66rem; display: block; font-weight: 400; color: #94A3B8; }
+    td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text); }
     tr:last-child td { border-bottom: none; }
-    tr:hover td { background: rgba(255,255,255,0.02); }
+    tr:hover td { background: #FAFBFF; }
     .td-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 
     /* ── BADGES ── */
     .badge {
-      display: inline-block; padding: 3px 9px; border-radius: 10px;
+      display: inline-block; padding: 3px 10px; border-radius: 10px;
       font-size: 0.74rem; font-weight: 600; white-space: nowrap;
     }
-    .badge-paid    { background: rgba(16,185,129,0.12); color: var(--green); }
-    .badge-unpaid  { background: rgba(239,68,68,0.12);  color: var(--red);   }
-    .badge-expired { background: rgba(239,68,68,0.15);  color: var(--red);   }
-    .badge-urgent  { background: rgba(239,68,68,0.12);  color: var(--red);   }
-    .badge-soon    { background: rgba(245,158,11,0.12); color: var(--amber); }
-    .badge-ok      { background: rgba(16,185,129,0.10); color: var(--green); }
+    .badge-paid    { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .badge-unpaid  { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+    .badge-expired { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+    .badge-urgent  { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+    .badge-soon    { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+    .badge-ok      { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
 
     /* ── SUMMARY BAR ── */
-    .summary-bar { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+    .summary-bar { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
     .sum-item {
-      background: var(--card2); border: 1px solid var(--border); border-radius: 10px;
-      padding: 12px 20px; min-width: 130px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px 20px; min-width: 130px; box-shadow: var(--shadow-sm);
     }
-    .sum-val { font-size: 1.25rem; font-weight: 700; color: var(--yellow); }
-    .sum-lbl { font-size: 0.73rem; color: var(--muted); margin-top: 2px; }
-    .sum-lbl-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.66rem; color: #475569; }
+    .sum-val { font-size: 1.3rem; font-weight: 700; color: var(--yellow-dark); }
+    .sum-lbl { font-size: 0.73rem; color: var(--muted); margin-top: 3px; font-weight: 500; }
+    .sum-lbl-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.66rem; color: #94A3B8; }
 
     /* ── PRICES ── */
-    .prices-meta { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; }
-    .avg-cell { font-weight: 700; color: var(--yellow); }
+    .prices-meta { font-size: 0.82rem; color: var(--muted); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .avg-cell { font-weight: 700; color: var(--yellow-dark); }
 
     /* ── EMPTY / SPINNER ── */
     .empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 0.88rem; }
@@ -200,9 +237,6 @@
       vertical-align: middle; margin-right: 6px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── LOGO SVG ── */
-    .logo-ring { display: flex; justify-content: center; margin-bottom: 18px; }
   </style>
 </head>
 <body>
@@ -211,9 +245,9 @@
 <div id="login-screen">
   <div class="login-card">
     <div class="logo-ring">
-      <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+      <svg width="64" height="64" viewBox="0 0 60 60" fill="none">
         <circle cx="30" cy="30" r="30" fill="#F59E0B"/>
-        <polygon points="35,9 21,30 29,30 25,51 39,30 31,30" fill="#0D1B2A"/>
+        <polygon points="35,9 21,30 29,30 25,51 39,30 31,30" fill="#1E293B"/>
       </svg>
     </div>
     <h1>Evergrow Electrical Service</h1>
@@ -230,6 +264,21 @@
 <!-- ════════════════ APP ════════════════ -->
 <div id="app">
 
+  <!-- DB Setup Banner -->
+  <div id="setup-banner">
+    <div class="sb-title">⚠️ Database tables not set up yet / 数据库尚未配置</div>
+    <div class="sb-body">
+      The portal is connected but the database tables are missing. Please follow these steps:
+      <ol class="sb-steps">
+        <li>Go to your <strong>Supabase Dashboard</strong> → project <strong>wimlphbdiborlwikjfdi</strong></li>
+        <li>Click <strong>SQL Editor</strong> → <strong>New Query</strong></li>
+        <li>Paste the SQL below and click <strong>Run</strong></li>
+        <li>Refresh this page</li>
+      </ol>
+    </div>
+    <button class="copy-btn" onclick="copySetupSql()">📋 Copy Setup SQL / 复制SQL</button>
+  </div>
+
   <!-- Alert Bar -->
   <div id="alert-bar">
     <strong>⚠ Urgent / 紧急 ·</strong>&nbsp;<span id="alert-text"></span>
@@ -239,7 +288,7 @@
   <header>
     <svg width="38" height="38" viewBox="0 0 60 60" fill="none">
       <circle cx="30" cy="30" r="30" fill="#F59E0B"/>
-      <polygon points="35,9 21,30 29,30 25,51 39,30 31,30" fill="#0D1B2A"/>
+      <polygon points="35,9 21,30 29,30 25,51 39,30 31,30" fill="#1E293B"/>
     </svg>
     <div>
       <div class="hdr-name">Evergrow Electrical Service</div>
@@ -300,6 +349,7 @@
         </div>
         <div class="form-actions">
           <button class="btn btn-primary" onclick="addInvoice()">Add Invoice / 添加发票</button>
+          <span class="form-err" id="inv-err"></span>
         </div>
       </div>
 
@@ -360,6 +410,7 @@
         </div>
         <div class="form-actions">
           <button class="btn btn-primary" onclick="addPermit()">Add Permit / 添加准证</button>
+          <span class="form-err" id="wp-err"></span>
         </div>
       </div>
 
@@ -410,6 +461,7 @@
         </div>
         <div class="form-actions">
           <button class="btn btn-primary" onclick="addRoadTax()">Add Vehicle / 添加车辆</button>
+          <span class="form-err" id="rt-err"></span>
         </div>
       </div>
 
@@ -462,12 +514,13 @@
             <input type="date" id="ins-expiry">
           </label>
         </div>
-        <div style="margin-top:12px;">
+        <div style="margin-top:14px;">
           <div class="lbl-en">Notes</div><div class="lbl-zh">备注（可自由填写）</div>
           <textarea id="ins-notes" placeholder="e.g. Covers all workers · Renewed monthly · Contact: John 9123 4567"></textarea>
         </div>
         <div class="form-actions">
           <button class="btn btn-primary" onclick="addInsurance()">Add Policy / 添加保险</button>
+          <span class="form-err" id="ins-err"></span>
         </div>
       </div>
 
@@ -531,10 +584,54 @@
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
-const SB_URL   = 'https://wimlphbdiborlwikjfdi.supabase.co';
-const SB_KEY   = 'sb_publishable_VTpMm2_t79Klsy-RjyVJEA_vhGpo_Np';
-const PW_HASH  = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
+const SB_URL     = 'https://wimlphbdiborlwikjfdi.supabase.co';
+const SB_KEY     = 'sb_publishable_VTpMm2_t79Klsy-RjyVJEA_vhGpo_Np';
+const PW_HASH    = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
 const PRICES_URL = 'https://adamdegoat.github.io/renoradar/data/electrical.json';
+
+const SETUP_SQL = `-- Run this in Supabase SQL Editor → New Query → Paste → Run
+
+CREATE TABLE invoices (
+  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  date          date NOT NULL,
+  invoice_number text NOT NULL,
+  company_name  text NOT NULL,
+  amount        numeric(10,2) NOT NULL,
+  status        text DEFAULT 'unpaid',
+  paid_date     date,
+  created_at    timestamptz DEFAULT now()
+);
+CREATE TABLE work_permits (
+  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  worker_name   text NOT NULL,
+  permit_number text NOT NULL,
+  expiry_date   date NOT NULL,
+  created_at    timestamptz DEFAULT now()
+);
+CREATE TABLE road_tax (
+  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  plate_number  text NOT NULL,
+  description   text,
+  expiry_date   date NOT NULL,
+  created_at    timestamptz DEFAULT now()
+);
+CREATE TABLE insurance_policies (
+  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  policy_name   text NOT NULL,
+  provider      text NOT NULL,
+  start_date    date NOT NULL,
+  expiry_date   date NOT NULL,
+  notes         text,
+  created_at    timestamptz DEFAULT now()
+);
+ALTER TABLE invoices           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE work_permits       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE road_tax           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE insurance_policies ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "allow_all" ON invoices           FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "allow_all" ON work_permits       FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "allow_all" ON road_tax           FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "allow_all" ON insurance_policies FOR ALL TO anon USING (true) WITH CHECK (true);`;
 
 // ── SUPABASE ──────────────────────────────────────────────────────────────────
 const sb = supabase.createClient(SB_URL, SB_KEY);
@@ -542,6 +639,7 @@ const sb = supabase.createClient(SB_URL, SB_KEY);
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let invoices = [], permits = [], roadtaxes = [], insurances = [];
 let invFilter = 'all';
+let dbReady = false;
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 async function sha256(str) {
@@ -580,9 +678,35 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 async function initApp() {
+  // Check if DB tables exist first
+  const { error: chk } = await sb.from('invoices').select('id').limit(1);
+  if (chk) {
+    const code = chk.code || '';
+    const msg  = chk.message || '';
+    if (code === '42P01' || msg.includes('does not exist') || msg.includes('relation')) {
+      document.getElementById('setup-banner').style.display = 'block';
+      // Fill empty tables with setup instructions
+      const noDb = `<tr><td colspan="99" class="empty" style="color:#B45309">
+        Database not ready — please run the setup SQL above. / 请先运行上方设置SQL。
+      </td></tr>`;
+      ['inv-tbody','wp-tbody','rt-tbody','ins-tbody'].forEach(id => {
+        document.getElementById(id).innerHTML = noDb;
+      });
+      return;
+    }
+  }
+  dbReady = true;
   await Promise.all([loadInvoices(), loadPermits(), loadRoadTax(), loadInsurance()]);
   loadPrices();
   refreshAlerts();
+}
+
+function copySetupSql() {
+  navigator.clipboard.writeText(SETUP_SQL).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = '✅ Copied! / 已复制！';
+    setTimeout(() => { btn.textContent = '📋 Copy Setup SQL / 复制SQL'; }, 2500);
+  });
 }
 
 // ── TABS ──────────────────────────────────────────────────────────────────────
@@ -618,10 +742,17 @@ function escH(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'inline';
+  setTimeout(() => { el.style.display = 'none'; el.textContent = ''; }, 5000);
+}
+
 // ── ALERTS + DOTS ─────────────────────────────────────────────────────────────
 function refreshAlerts() {
   const msgs = [];
-
   permits.forEach(p => {
     const d = daysUntil(p.expiry_date);
     if (d !== null && d <= 30)
@@ -653,7 +784,6 @@ function refreshAlerts() {
     if (show && !ex) { const d = document.createElement('span'); d.className = 'tab-dot'; btn.appendChild(d); }
     else if (!show && ex) ex.remove();
   }
-
   setDot('permits',   permits.some(p   => { const d = daysUntil(p.expiry_date);   return d !== null && d <= 60; }));
   setDot('roadtax',   roadtaxes.some(r => { const d = daysUntil(r.expiry_date);   return d !== null && d <= 60; }));
   setDot('insurance', insurances.some(i => { const d = daysUntil(i.expiry_date); return d !== null && d <= 60; }));
@@ -669,16 +799,16 @@ async function loadInvoices() {
 }
 
 function renderInvSummary() {
-  const total  = invoices.reduce((s, i) => s + parseFloat(i.amount), 0);
-  const paid   = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + parseFloat(i.amount), 0);
-  const unpaid = total - paid;
+  const total   = invoices.reduce((s, i) => s + parseFloat(i.amount), 0);
+  const paid    = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + parseFloat(i.amount), 0);
+  const unpaid  = total - paid;
   const nUnpaid = invoices.filter(i => i.status === 'unpaid').length;
   document.getElementById('inv-summary').innerHTML = `
     <div class="sum-item"><div class="sum-val">$${total.toFixed(2)}</div><div class="sum-lbl">Total Invoiced</div><div class="sum-lbl-zh">发票总额</div></div>
-    <div class="sum-item"><div class="sum-val" style="color:var(--green)">$${paid.toFixed(2)}</div><div class="sum-lbl">Collected</div><div class="sum-lbl-zh">已收款</div></div>
-    <div class="sum-item"><div class="sum-val" style="color:var(--red)">$${unpaid.toFixed(2)}</div><div class="sum-lbl">Outstanding</div><div class="sum-lbl-zh">未收款</div></div>
+    <div class="sum-item"><div class="sum-val" style="color:#059669">$${paid.toFixed(2)}</div><div class="sum-lbl">Collected</div><div class="sum-lbl-zh">已收款</div></div>
+    <div class="sum-item"><div class="sum-val" style="color:#DC2626">$${unpaid.toFixed(2)}</div><div class="sum-lbl">Outstanding</div><div class="sum-lbl-zh">未收款</div></div>
     <div class="sum-item"><div class="sum-val">${invoices.length}</div><div class="sum-lbl">Total Invoices</div><div class="sum-lbl-zh">发票总数</div></div>
-    <div class="sum-item"><div class="sum-val" style="color:var(--red)">${nUnpaid}</div><div class="sum-lbl">Unpaid</div><div class="sum-lbl-zh">未付款</div></div>
+    <div class="sum-item"><div class="sum-val" style="color:#DC2626">${nUnpaid}</div><div class="sum-lbl">Unpaid</div><div class="sum-lbl-zh">未付款</div></div>
   `;
 }
 
@@ -718,10 +848,18 @@ async function addInvoice() {
   const company_name   = document.getElementById('inv-company').value.trim();
   const amount         = parseFloat(document.getElementById('inv-amount').value);
   if (!date || !invoice_number || !company_name || isNaN(amount) || amount <= 0) {
-    alert('Please fill in all fields. / 请填写所有字段。'); return;
+    showErr('inv-err', 'Please fill in all fields. / 请填写所有字段。'); return;
   }
   const { error } = await sb.from('invoices').insert({ date, invoice_number, company_name, amount, status: 'unpaid' });
-  if (error) { alert('Error saving: ' + error.message); return; }
+  if (error) {
+    if (error.code === '42P01' || (error.message || '').includes('does not exist')) {
+      showErr('inv-err', 'Database not set up yet. Please run the setup SQL. / 数据库未配置。');
+      document.getElementById('setup-banner').style.display = 'block';
+    } else {
+      showErr('inv-err', 'Error: ' + error.message);
+    }
+    return;
+  }
   document.getElementById('inv-number').value = '';
   document.getElementById('inv-company').value = '';
   document.getElementById('inv-amount').value = '';
@@ -731,14 +869,14 @@ async function addInvoice() {
 async function markPaid(id) {
   const today = new Date().toISOString().split('T')[0];
   const { error } = await sb.from('invoices').update({ status: 'paid', paid_date: today }).eq('id', id);
-  if (error) { alert('Error: ' + error.message); return; }
+  if (error) { showErr('inv-err', 'Error: ' + error.message); return; }
   await loadInvoices();
 }
 
 async function delInvoice(id) {
   if (!confirm('Delete this invoice? / 确认删除此发票？')) return;
   const { error } = await sb.from('invoices').delete().eq('id', id);
-  if (error) { alert('Error: ' + error.message); return; }
+  if (error) { showErr('inv-err', 'Error: ' + error.message); return; }
   await loadInvoices();
 }
 
@@ -772,23 +910,29 @@ async function addPermit() {
   const permit_number = document.getElementById('wp-permit').value.trim();
   const expiry_date   = document.getElementById('wp-expiry').value;
   if (!worker_name || !permit_number || !expiry_date) {
-    alert('Please fill in all fields. / 请填写所有字段。'); return;
+    showErr('wp-err', 'Please fill in all fields. / 请填写所有字段。'); return;
   }
   const { error } = await sb.from('work_permits').insert({ worker_name, permit_number, expiry_date });
-  if (error) { alert('Error: ' + error.message); return; }
+  if (error) {
+    if (error.code === '42P01' || (error.message || '').includes('does not exist')) {
+      showErr('wp-err', 'Database not set up yet. / 数据库未配置。');
+      document.getElementById('setup-banner').style.display = 'block';
+    } else {
+      showErr('wp-err', 'Error: ' + error.message);
+    }
+    return;
+  }
   document.getElementById('wp-name').value = '';
   document.getElementById('wp-permit').value = '';
   document.getElementById('wp-expiry').value = '';
-  await loadPermits();
-  refreshAlerts();
+  await loadPermits(); refreshAlerts();
 }
 
 async function delPermit(id) {
   if (!confirm('Delete this permit? / 确认删除此准证？')) return;
   const { error } = await sb.from('work_permits').delete().eq('id', id);
-  if (error) { alert('Error: ' + error.message); return; }
-  await loadPermits();
-  refreshAlerts();
+  if (error) { showErr('wp-err', 'Error: ' + error.message); return; }
+  await loadPermits(); refreshAlerts();
 }
 
 // ── ROAD TAX ──────────────────────────────────────────────────────────────────
@@ -821,23 +965,29 @@ async function addRoadTax() {
   const description  = document.getElementById('rt-desc').value.trim();
   const expiry_date  = document.getElementById('rt-expiry').value;
   if (!plate_number || !expiry_date) {
-    alert('Plate number and expiry date required. / 请填写车牌号和到期日。'); return;
+    showErr('rt-err', 'Plate number and expiry date required. / 请填写车牌号和到期日。'); return;
   }
   const { error } = await sb.from('road_tax').insert({ plate_number, description, expiry_date });
-  if (error) { alert('Error: ' + error.message); return; }
+  if (error) {
+    if (error.code === '42P01' || (error.message || '').includes('does not exist')) {
+      showErr('rt-err', 'Database not set up yet. / 数据库未配置。');
+      document.getElementById('setup-banner').style.display = 'block';
+    } else {
+      showErr('rt-err', 'Error: ' + error.message);
+    }
+    return;
+  }
   document.getElementById('rt-plate').value = '';
   document.getElementById('rt-desc').value = '';
   document.getElementById('rt-expiry').value = '';
-  await loadRoadTax();
-  refreshAlerts();
+  await loadRoadTax(); refreshAlerts();
 }
 
 async function delRoadTax(id) {
   if (!confirm('Delete this vehicle? / 确认删除此车辆？')) return;
   const { error } = await sb.from('road_tax').delete().eq('id', id);
-  if (error) { alert('Error: ' + error.message); return; }
-  await loadRoadTax();
-  refreshAlerts();
+  if (error) { showErr('rt-err', 'Error: ' + error.message); return; }
+  await loadRoadTax(); refreshAlerts();
 }
 
 // ── INSURANCE ─────────────────────────────────────────────────────────────────
@@ -874,25 +1024,31 @@ async function addInsurance() {
   const expiry_date = document.getElementById('ins-expiry').value;
   const notes       = document.getElementById('ins-notes').value.trim();
   if (!policy_name || !provider || !start_date || !expiry_date) {
-    alert('Please fill in all required fields. / 请填写必填字段。'); return;
+    showErr('ins-err', 'Please fill in all required fields. / 请填写必填字段。'); return;
   }
   const { error } = await sb.from('insurance_policies').insert({ policy_name, provider, start_date, expiry_date, notes });
-  if (error) { alert('Error: ' + error.message); return; }
+  if (error) {
+    if (error.code === '42P01' || (error.message || '').includes('does not exist')) {
+      showErr('ins-err', 'Database not set up yet. / 数据库未配置。');
+      document.getElementById('setup-banner').style.display = 'block';
+    } else {
+      showErr('ins-err', 'Error: ' + error.message);
+    }
+    return;
+  }
   document.getElementById('ins-name').value = '';
   document.getElementById('ins-provider').value = '';
   document.getElementById('ins-start').value = '';
   document.getElementById('ins-expiry').value = '';
   document.getElementById('ins-notes').value = '';
-  await loadInsurance();
-  refreshAlerts();
+  await loadInsurance(); refreshAlerts();
 }
 
 async function delInsurance(id) {
   if (!confirm('Delete this policy? / 确认删除此保险？')) return;
   const { error } = await sb.from('insurance_policies').delete().eq('id', id);
-  if (error) { alert('Error: ' + error.message); return; }
-  await loadInsurance();
-  refreshAlerts();
+  if (error) { showErr('ins-err', 'Error: ' + error.message); return; }
+  await loadInsurance(); refreshAlerts();
 }
 
 // ── PRICES ────────────────────────────────────────────────────────────────────
