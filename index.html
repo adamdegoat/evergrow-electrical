@@ -380,6 +380,14 @@
 
       <div class="summary-bar" id="inv-summary"></div>
 
+      <div style="margin-bottom:14px;position:relative;max-width:340px;">
+        <input type="text" id="inv-search" placeholder="Search invoice number / 搜索发票号码"
+               oninput="setInvSearch(this.value)" autocomplete="off"
+               style="padding-left:36px;padding-right:36px;">
+        <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:0.95rem;pointer-events:none;">🔍</span>
+        <button id="inv-search-clear" onclick="clearInvSearch()" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;line-height:1;padding:2px;">×</button>
+      </div>
+
       <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
         <div class="filter-bar" style="margin-bottom:0;flex:1;min-width:200px;">
           <button class="filter-btn active" onclick="setInvFilter('all',this)">All / 全部</button>
@@ -713,6 +721,7 @@ const sb = supabase.createClient(SB_URL, SB_KEY);
 let invoices = [], permits = [], roadtaxes = [], insurances = [];
 let invFilter = 'all';
 let invSort   = 'date';
+let invSearch = '';
 let dbReady = false;
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
@@ -900,8 +909,22 @@ function setInvSort(s, btn) {
   renderInvoices();
 }
 
+function setInvSearch(val) {
+  invSearch = val.trim().toLowerCase();
+  document.getElementById('inv-search-clear').style.display = invSearch ? 'block' : 'none';
+  renderInvoices();
+}
+
+function clearInvSearch() {
+  invSearch = '';
+  document.getElementById('inv-search').value = '';
+  document.getElementById('inv-search-clear').style.display = 'none';
+  renderInvoices();
+}
+
 function renderInvoices() {
   let rows = invFilter === 'all' ? invoices.slice() : invoices.filter(i => i.status === invFilter);
+  if (invSearch) rows = rows.filter(i => i.invoice_number.toLowerCase().includes(invSearch));
   if (invSort === 'company') {
     rows.sort((a, b) => a.company_name.localeCompare(b.company_name));
   } else {
