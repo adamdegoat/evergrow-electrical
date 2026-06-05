@@ -753,37 +753,37 @@ const SB_KEY     = 'sb_publishable_VTpMm2_t79Klsy-RjyVJEA_vhGpo_Np';
 const PW_HASH    = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
 const PRICES_URL = 'https://adamdegoat.github.io/renoradar/data/electrical.json';
 
-const SETUP_SQL = `CREATE TABLE invoices (
+const SETUP_SQL = `CREATE TABLE IF NOT EXISTS invoices (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   date date NOT NULL, invoice_number text NOT NULL,
   company_name text NOT NULL, amount numeric(10,2) NOT NULL,
   status text DEFAULT 'unpaid', paid_date date,
   created_at timestamptz DEFAULT now()
 );
-CREATE TABLE quotations (
+CREATE TABLE IF NOT EXISTS quotations (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   date date NOT NULL, quotation_number text NOT NULL,
   company_name text NOT NULL, amount numeric(10,2) NOT NULL,
   status text DEFAULT 'pending', accepted_date date,
   created_at timestamptz DEFAULT now()
 );
-CREATE TABLE work_permits (
+CREATE TABLE IF NOT EXISTS work_permits (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   worker_name text NOT NULL, permit_number text NOT NULL,
   expiry_date date NOT NULL, created_at timestamptz DEFAULT now()
 );
-CREATE TABLE road_tax (
+CREATE TABLE IF NOT EXISTS road_tax (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   plate_number text NOT NULL, description text,
   expiry_date date NOT NULL, created_at timestamptz DEFAULT now()
 );
-CREATE TABLE insurance_policies (
+CREATE TABLE IF NOT EXISTS insurance_policies (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   policy_name text NOT NULL, provider text NOT NULL,
   start_date date NOT NULL, expiry_date date NOT NULL,
   notes text, created_at timestamptz DEFAULT now()
 );
-CREATE TABLE licensing_invoices (
+CREATE TABLE IF NOT EXISTS licensing_invoices (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   date date NOT NULL, invoice_number text NOT NULL,
   company_name text NOT NULL, amount numeric(10,2) NOT NULL,
@@ -796,12 +796,24 @@ ALTER TABLE work_permits       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE road_tax           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE insurance_policies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE licensing_invoices ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "allow_all" ON invoices           FOR ALL TO anon USING (true) WITH CHECK (true);
-CREATE POLICY "allow_all" ON quotations         FOR ALL TO anon USING (true) WITH CHECK (true);
-CREATE POLICY "allow_all" ON work_permits       FOR ALL TO anon USING (true) WITH CHECK (true);
-CREATE POLICY "allow_all" ON road_tax           FOR ALL TO anon USING (true) WITH CHECK (true);
-CREATE POLICY "allow_all" ON insurance_policies FOR ALL TO anon USING (true) WITH CHECK (true);
-CREATE POLICY "allow_all" ON licensing_invoices FOR ALL TO anon USING (true) WITH CHECK (true);`;
+DO $$ BEGIN
+  CREATE POLICY "allow_all" ON invoices FOR ALL TO anon USING (true) WITH CHECK (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "allow_all" ON quotations FOR ALL TO anon USING (true) WITH CHECK (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "allow_all" ON work_permits FOR ALL TO anon USING (true) WITH CHECK (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "allow_all" ON road_tax FOR ALL TO anon USING (true) WITH CHECK (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "allow_all" ON insurance_policies FOR ALL TO anon USING (true) WITH CHECK (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "allow_all" ON licensing_invoices FOR ALL TO anon USING (true) WITH CHECK (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;`;
 
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
@@ -846,18 +858,31 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+function isMissingTable(err) {
+  if (!err) return false;
+  return err.code === '42P01' || (err.message||'').includes('does not exist') || (err.message||'').includes('relation');
+}
 async function initApp() {
-  const { error: chk } = await sb.from('invoices').select('id').limit(1);
-  if (chk) {
-    const code = chk.code || '', msg = chk.message || '';
-    if (code === '42P01' || msg.includes('does not exist') || msg.includes('relation')) {
-      document.getElementById('setup-banner').style.display = 'block';
-      const noDb = `<tr><td colspan="99" class="empty" style="color:#B45309">Database not ready — please run the setup SQL above. / 请先运行上方设置SQL。</td></tr>`;
-      ['inv-tbody','qt-tbody','wp-tbody','rt-tbody','ins-tbody','li-tbody'].forEach(id => {
-        document.getElementById(id).innerHTML = noDb;
-      });
-      return;
-    }
+  const noDb = `<tr><td colspan="99" class="empty" style="color:#B45309">Database not ready — please run the setup SQL above. / 请先运行上方设置SQL。</td></tr>`;
+  const { error: chkInv } = await sb.from('invoices').select('id').limit(1);
+  if (isMissingTable(chkInv)) {
+    document.getElementById('setup-banner').style.display = 'block';
+    ['inv-tbody','qt-tbody','wp-tbody','rt-tbody','ins-tbody','li-tbody'].forEach(id => {
+      document.getElementById(id).innerHTML = noDb;
+    });
+    return;
+  }
+  // Check if the newer tables (quotations, licensing_invoices) have been added
+  const { error: chkQt } = await sb.from('quotations').select('id').limit(1);
+  if (isMissingTable(chkQt)) {
+    document.getElementById('setup-banner').style.display = 'block';
+    const newTablesMsg = `<tr><td colspan="99" class="empty" style="color:#B45309">New tables not set up — copy and run the setup SQL above (safe to re-run). / 请复制并运行上方SQL（可重复运行，不会影响已有数据）。</td></tr>`;
+    document.getElementById('qt-tbody').innerHTML = newTablesMsg;
+    document.getElementById('li-tbody').innerHTML = newTablesMsg;
+    await Promise.all([loadInvoices(), loadPermits(), loadRoadTax(), loadInsurance()]);
+    loadPrices();
+    refreshAlerts();
+    return;
   }
   await Promise.all([loadInvoices(), loadQuotations(), loadPermits(), loadRoadTax(), loadInsurance(), loadLicensing()]);
   loadPrices();
