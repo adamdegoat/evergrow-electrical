@@ -368,7 +368,9 @@
         <div class="sort-row">
           <span class="sort-lbl">Sort / 排序：</span>
           <button class="sort-btn active" onclick="setInvSort('date',this)">Date / 日期 ↓</button>
+          <button class="sort-btn" onclick="setInvSort('invoice',this)">Invoice No. / 发票号</button>
           <button class="sort-btn" onclick="setInvSort('company',this)">Company / 公司 A–Z</button>
+          <button class="sort-btn" onclick="setInvSort('status',this)">Status / 状态</button>
         </div>
       </div>
       <div class="card">
@@ -806,6 +808,8 @@ function dbErr(errId, error) {
 }
 function sortRows(rows, sort) {
   if (sort === 'company') rows.sort((a,b) => a.company_name.localeCompare(b.company_name));
+  else if (sort === 'invoice') rows.sort((a,b) => (a.invoice_number||'').localeCompare(b.invoice_number||'', undefined, {numeric:true}));
+  else if (sort === 'status') rows.sort((a,b) => (a.status||'').localeCompare(b.status||'') || (b.date > a.date ? 1 : -1));
   else rows.sort((a,b) => (b.date > a.date ? 1 : b.date < a.date ? -1 : 0));
   return rows;
 }
