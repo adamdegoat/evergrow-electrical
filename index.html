@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Evergrow Electrical Service — Manager Portal</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     :root {
@@ -294,9 +295,6 @@
     <button class="tab-btn active" onclick="showTab('invoices',this)" id="tabn-invoices">
       <span class="tab-en">Invoices</span><span class="tab-zh">发票</span>
     </button>
-    <button class="tab-btn" onclick="showTab('quotations',this)" id="tabn-quotations">
-      <span class="tab-en">Quotations</span><span class="tab-zh">报价单</span>
-    </button>
     <button class="tab-btn" onclick="showTab('permits',this)" id="tabn-permits">
       <span class="tab-en">Work Permits</span><span class="tab-zh">工作准证</span>
     </button>
@@ -306,15 +304,17 @@
     <button class="tab-btn" onclick="showTab('insurance',this)" id="tabn-insurance">
       <span class="tab-en">Insurance</span><span class="tab-zh">保险</span>
     </button>
-    <button class="tab-btn" onclick="showTab('prices',this)" id="tabn-prices">
-      <span class="tab-en">Prices</span><span class="tab-zh">参考价格</span>
-    </button>
     <button class="tab-btn" onclick="showTab('licensing',this)" id="tabn-licensing">
       <span class="tab-en">Licensing Inv.</span><span class="tab-zh">牌照发票</span>
     </button>
-    <div class="tab-sep"></div>
-    <button class="tab-btn" onclick="showTab('howto',this)" id="tabn-howto">
-      <span class="tab-en">How to Use</span><span class="tab-zh">使用说明</span>
+    <button class="tab-btn" onclick="showTab('uob',this)" id="tabn-uob">
+      <span class="tab-en">UOB</span><span class="tab-zh">大华银行</span>
+    </button>
+    <button class="tab-btn" onclick="showTab('ocbc',this)" id="tabn-ocbc">
+      <span class="tab-en">OCBC</span><span class="tab-zh">华侨银行</span>
+    </button>
+    <button class="tab-btn" onclick="showTab('salary',this)" id="tabn-salary">
+      <span class="tab-en">Salary &amp; Payments</span><span class="tab-zh">工资与付款</span>
     </button>
   </nav>
 
@@ -369,60 +369,6 @@
               <th>Actions<span class="col-zh">操作</span></th>
             </tr></thead>
             <tbody id="inv-tbody"><tr><td colspan="7" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ QUOTATIONS ══ -->
-    <div class="tab-panel" id="panel-quotations">
-      <div class="sec-head">
-        <div class="sec-title"><div class="en">Quotation Management</div><div class="zh">报价单管理</div></div>
-      </div>
-      <div class="card">
-        <div class="card-title">➕ Add Quotation <span class="zh">添加报价单</span></div>
-        <div class="form-grid cols-4">
-          <label><div class="lbl-en">Date</div><div class="lbl-zh">日期</div><input type="date" id="qt-date"></label>
-          <label><div class="lbl-en">Quotation Number</div><div class="lbl-zh">报价单号码</div><input type="text" id="qt-number" placeholder="QT-001"></label>
-          <label><div class="lbl-en">Company Name</div><div class="lbl-zh">公司名称</div><input type="text" id="qt-company" placeholder="Company Pte Ltd"></label>
-          <label><div class="lbl-en">Amount (SGD)</div><div class="lbl-zh">金额（新元）</div><input type="number" id="qt-amount" placeholder="0.00" step="0.01" min="0"></label>
-        </div>
-        <div class="form-actions">
-          <button class="btn btn-primary" onclick="addQuotation()">Add Quotation / 添加报价单</button>
-          <span class="form-err" id="qt-err"></span>
-        </div>
-      </div>
-      <div class="summary-bar" id="qt-summary"></div>
-      <div class="search-wrap" style="max-width:320px;">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="qt-search" placeholder="Search quotation no. / 搜索报价单号" oninput="setQtSearch(this.value)" autocomplete="off">
-        <button class="search-clear" id="qt-search-clear" onclick="clearQtSearch()">×</button>
-      </div>
-      <div class="controls-row">
-        <div class="filter-bar" id="qt-filters">
-          <button class="filter-btn active" onclick="setQtFilter('all',this)">All / 全部</button>
-          <button class="filter-btn" onclick="setQtFilter('pending',this)">Pending / 待确认</button>
-          <button class="filter-btn" onclick="setQtFilter('accepted',this)">Accepted / 已接受</button>
-        </div>
-        <div class="sort-row">
-          <span class="sort-lbl">Sort / 排序：</span>
-          <button class="sort-btn active" onclick="setQtSort('date',this)">Date / 日期 ↓</button>
-          <button class="sort-btn" onclick="setQtSort('company',this)">Company / 公司 A–Z</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr>
-              <th>Date<span class="col-zh">日期</span></th>
-              <th>Quotation No.<span class="col-zh">报价单号</span></th>
-              <th>Company<span class="col-zh">公司</span></th>
-              <th>Amount<span class="col-zh">金额</span></th>
-              <th>Status<span class="col-zh">状态</span></th>
-              <th>Accepted On<span class="col-zh">接受日期</span></th>
-              <th>Actions<span class="col-zh">操作</span></th>
-            </tr></thead>
-            <tbody id="qt-tbody"><tr><td colspan="7" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -534,56 +480,6 @@
       </div>
     </div>
 
-    <!-- ══ PRICES ══ -->
-    <div class="tab-panel" id="panel-prices">
-      <div class="sec-head">
-        <div class="sec-title"><div class="en">Reference Prices (Electrical Works)</div><div class="zh">参考价格（电气工程）</div></div>
-      </div>
-      <div class="info-card">
-        <div class="ic-title">📊 How these prices work / 价格数据说明</div>
-        <div class="info-grid">
-          <div class="info-point"><span class="info-icon">🤖</span><div>
-            <div class="info-en">Automatically collected every week</div>
-            <div class="info-zh">每周自动采集一次。系统通过 RenoRadar 智能平台从新加坡多个装修报价来源收集最新价格数据，无需人工操作。</div>
-          </div></div>
-          <div class="info-point"><span class="info-icon">📡</span><div>
-            <div class="info-en">Live Singapore market data</div>
-            <div class="info-zh">数据来源于本地新加坡市场的真实报价，反映当前行情，让您随时了解最新市场参考价格。</div>
-          </div></div>
-          <div class="info-point"><span class="info-icon">🔒</span><div>
-            <div class="info-en">Read-only — for reference only</div>
-            <div class="info-zh">此页面仅供参考，数据由系统自动更新，管理员无法手动修改，确保数据的客观性与准确性。</div>
-          </div></div>
-          <div class="info-point"><span class="info-icon">💡</span><div>
-            <div class="info-en">Check if your quotes are competitive</div>
-            <div class="info-zh">您可以对比这些市场均价，判断公司的报价是否具有竞争力，帮助团队做出更明智的商业决策。</div>
-          </div></div>
-        </div>
-        <div class="tier-legend">
-          <div class="tier-item"><span class="tier-label">Budget / 经济</span><span class="tier-desc">— 基本施工，材料标准</span></div>
-          <div class="tier-item"><span class="tier-label">Mid-Range / 中档</span><span class="tier-desc">— 良好品质，市场主流</span></div>
-          <div class="tier-item"><span class="tier-label">Premium / 高档</span><span class="tier-desc">— 优质材料，高端施工</span></div>
-          <div class="tier-item"><span class="tier-label">Market Avg / 市场均价</span><span class="tier-desc">— 三档综合平均参考价</span></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="prices-meta" id="prices-meta"><span class="spinner"></span> Loading from RenoRadar / 正在加载参考价格...</div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr>
-              <th>Item<span class="col-zh">项目</span></th>
-              <th>Unit<span class="col-zh">单位</span></th>
-              <th>Budget<span class="col-zh">经济</span></th>
-              <th>Mid-Range<span class="col-zh">中档</span></th>
-              <th>Premium<span class="col-zh">高档</span></th>
-              <th>Market Avg<span class="col-zh">市场均价</span></th>
-            </tr></thead>
-            <tbody id="prices-tbody"><tr><td colspan="6" class="empty"><span class="spinner"></span></td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
     <!-- ══ LICENSING INVOICES ══ -->
     <div class="tab-panel" id="panel-licensing">
       <div class="sec-head">
@@ -638,109 +534,102 @@
       </div>
     </div>
 
-    <!-- ══ HOW TO USE ══ -->
-    <div class="tab-panel" id="panel-howto">
-      <div class="howto-intro">
-        <h2>📖 使用说明</h2>
-        <p>欢迎使用 Evergrow Electrical Service 管理系统。本系统专供公司管理人员使用，方便您随时随地通过手机或电脑查看和更新公司重要资料。所有资料均实时同步，全体管理人员看到的数据始终保持一致。</p>
+    <!-- ══ UOB PAYMENTS ══ -->
+    <div class="tab-panel" id="panel-uob">
+      <div class="sec-head">
+        <div class="sec-title"><div class="en">UOB Payments</div><div class="zh">大华银行付款</div></div>
       </div>
-      <div class="howto-grid">
-        <div class="howto-card">
-          <h3>🔐 登录与登出</h3>
-          <ul>
-            <li>使用公司统一密码登录系统</li>
-            <li>登录后，会话将保持有效，直到您点击右上角的"登出"按钮</li>
-            <li>如果关闭浏览器，下次需重新输入密码</li>
-            <li>所有管理员使用同一个密码，无需各自注册账号</li>
-          </ul>
+      <div class="card">
+        <div class="card-title">➕ Add UOB Payment <span class="zh">添加大华银行付款</span></div>
+        <div class="form-grid cols-3">
+          <label><div class="lbl-en">Date</div><div class="lbl-zh">日期</div><input type="date" id="uob-date"></label>
+          <label><div class="lbl-en">Invoice Number</div><div class="lbl-zh">发票号码</div><input type="text" id="uob-f2" placeholder="INV-001"></label>
+          <label><div class="lbl-en">Amount (SGD)</div><div class="lbl-zh">金额（新元）</div><input type="number" id="uob-amt" placeholder="0.00" step="0.01" min="0"></label>
         </div>
-        <div class="howto-card">
-          <h3>🧾 发票管理（Invoices）</h3>
-          <ul>
-            <li>此页面用于记录公司向客户开出的<strong>普通发票</strong></li>
-            <li>填写日期、发票号码、公司名称和金额，点击"添加发票"即可保存</li>
-            <li>收到付款后，点击"标记付款"，系统自动记录付款日期</li>
-            <li>可按全部 / 未付款 / 已付款筛选记录</li>
-            <li>可按日期或公司名称排序</li>
-            <li>使用搜索框可快速找到特定发票号码</li>
-            <li>顶部数字栏显示发票总额、已收款和未收款金额</li>
-          </ul>
-        </div>
-        <div class="howto-card">
-          <h3>📋 报价单管理（Quotations）</h3>
-          <ul>
-            <li>此页面用于记录公司发出的<strong>报价单</strong></li>
-            <li>操作方式与发票页面完全相同</li>
-            <li>默认状态为"待确认"，客户确认后点击"标记已接受"</li>
-            <li>系统自动记录客户接受日期</li>
-            <li>可按全部 / 待确认 / 已接受筛选，支持排序和搜索</li>
-          </ul>
-        </div>
-        <div class="howto-card">
-          <h3>📄 牌照发票（Licensing Invoices）</h3>
-          <ul>
-            <li>此页面专门用于记录与<strong>牌照相关</strong>的发票</li>
-            <li>与普通发票完全分开，方便单独追踪牌照费用</li>
-            <li>操作方式与发票页面完全相同</li>
-            <li>同样支持筛选、排序和发票号搜索功能</li>
-          </ul>
-        </div>
-        <div class="howto-card">
-          <h3>👷 工作准证（Work Permits）</h3>
-          <ul>
-            <li>记录所有工人的工作准证号码及到期日</li>
-            <li>填写工人姓名、准证号码和到期日期即可添加</li>
-            <li>系统自动计算剩余天数，并以颜色提醒：</li>
-          </ul>
-          <div class="badge-legend">
-            <span class="badge badge-urgent">⚠ 30天内到期（紧急）</span>
-            <span class="badge badge-soon">⚡ 31–60天（尽快续签）</span>
-            <span class="badge badge-ok">状态良好</span>
-          </div>
-        </div>
-        <div class="howto-card">
-          <h3>🚗 道路税（Road Tax）</h3>
-          <ul>
-            <li>记录公司所有车辆的道路税到期日</li>
-            <li>填写车牌号码、车辆描述和到期日期</li>
-            <li>颜色提醒系统与工作准证相同</li>
-            <li>车牌号码输入后会自动转为大写字母</li>
-          </ul>
-        </div>
-        <div class="howto-card">
-          <h3>🛡️ 保险（Insurance）</h3>
-          <ul>
-            <li>记录公司所有保险单的详细信息</li>
-            <li>可填写保险名称、保险公司、开始日期、到期日期</li>
-            <li>备注栏可自由填写任何内容，例如联系人电话、续保方式等</li>
-            <li>颜色提醒系统与工作准证相同</li>
-          </ul>
-        </div>
-        <div class="howto-card">
-          <h3>💰 参考价格（Prices）</h3>
-          <ul>
-            <li>显示电气工程的新加坡市场参考价格</li>
-            <li>数据由系统每周自动采集，无需人工操作</li>
-            <li>分为经济 / 中档 / 高档 三个价格档次及市场均价</li>
-            <li>仅供参考，此页面无法手动修改任何数据</li>
-          </ul>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="addPay('uob')">Add / 添加</button>
+          <span class="form-err" id="uob-err"></span>
         </div>
       </div>
-      <div class="howto-card" style="margin-top:4px;">
-        <h3>🔔 顶部警报与标签提示</h3>
-        <ul>
-          <li>当有工作准证、道路税或保险在 <strong>30天内到期</strong> 时，页面顶部会出现<span style="color:#991B1B;font-weight:600;">红色警报栏</span>，列出所有紧急项目</li>
-          <li>相关标签页名称旁边会出现一个<span style="color:#DC2626;font-weight:600;">红色小圆点</span>，方便您快速定位哪个类别需要处理</li>
-          <li>小圆点出现表示该类别有项目将在 60 天内到期，请及时跟进</li>
-        </ul>
+      <div class="summary-bar" id="uob-summary"></div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Date<span class="col-zh">日期</span></th>
+              <th>Invoice Number<span class="col-zh">发票号码</span></th>
+              <th>Amount<span class="col-zh">金额</span></th>
+              <th>Actions<span class="col-zh">操作</span></th>
+            </tr></thead>
+            <tbody id="uob-tbody"><tr><td colspan="4" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
+          </table>
+        </div>
       </div>
-      <div class="howto-card">
-        <h3>🗑️ 删除记录</h3>
-        <ul>
-          <li>每条记录右侧均有"Delete / 删除"按钮</li>
-          <li>点击后系统会弹出确认提示，请确认后再删除</li>
-          <li><strong>删除后无法恢复，请谨慎操作</strong></li>
-        </ul>
+    </div>
+
+    <!-- ══ OCBC PAYMENTS ══ -->
+    <div class="tab-panel" id="panel-ocbc">
+      <div class="sec-head">
+        <div class="sec-title"><div class="en">OCBC Payments</div><div class="zh">华侨银行付款</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">➕ Add OCBC Payment <span class="zh">添加华侨银行付款</span></div>
+        <div class="form-grid cols-3">
+          <label><div class="lbl-en">Date</div><div class="lbl-zh">日期</div><input type="date" id="ocbc-date"></label>
+          <label><div class="lbl-en">Invoice Number</div><div class="lbl-zh">发票号码</div><input type="text" id="ocbc-f2" placeholder="INV-001"></label>
+          <label><div class="lbl-en">Amount (SGD)</div><div class="lbl-zh">金额（新元）</div><input type="number" id="ocbc-amt" placeholder="0.00" step="0.01" min="0"></label>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="addPay('ocbc')">Add / 添加</button>
+          <span class="form-err" id="ocbc-err"></span>
+        </div>
+      </div>
+      <div class="summary-bar" id="ocbc-summary"></div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Date<span class="col-zh">日期</span></th>
+              <th>Invoice Number<span class="col-zh">发票号码</span></th>
+              <th>Amount<span class="col-zh">金额</span></th>
+              <th>Actions<span class="col-zh">操作</span></th>
+            </tr></thead>
+            <tbody id="ocbc-tbody"><tr><td colspan="4" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SALARY & PAYMENTS ══ -->
+    <div class="tab-panel" id="panel-salary">
+      <div class="sec-head">
+        <div class="sec-title"><div class="en">Salary & Payments</div><div class="zh">工资与付款</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">➕ Add Payment <span class="zh">添加付款</span></div>
+        <div class="form-grid cols-3">
+          <label><div class="lbl-en">Date</div><div class="lbl-zh">日期</div><input type="date" id="salary-date"></label>
+          <label><div class="lbl-en">Name</div><div class="lbl-zh">姓名</div><input type="text" id="salary-f2" placeholder="Name / 姓名"></label>
+          <label><div class="lbl-en">Amount (SGD)</div><div class="lbl-zh">金额（新元）</div><input type="number" id="salary-amt" placeholder="0.00" step="0.01" min="0"></label>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="addPay('salary')">Add / 添加</button>
+          <span class="form-err" id="salary-err"></span>
+        </div>
+      </div>
+      <div class="summary-bar" id="salary-summary"></div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Date<span class="col-zh">日期</span></th>
+              <th>Name<span class="col-zh">姓名</span></th>
+              <th>Amount<span class="col-zh">金额</span></th>
+              <th>Actions<span class="col-zh">操作</span></th>
+            </tr></thead>
+            <tbody id="salary-tbody"><tr><td colspan="4" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -751,7 +640,6 @@
 const SB_URL     = 'https://wimlphbdiborlwikjfdi.supabase.co';
 const SB_KEY     = 'sb_publishable_VTpMm2_t79Klsy-RjyVJEA_vhGpo_Np';
 const PW_HASH    = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
-const PRICES_URL = 'https://adamdegoat.github.io/renoradar/data/electrical.json';
 
 const SETUP_SQL = `CREATE TABLE IF NOT EXISTS invoices (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -813,14 +701,31 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
   CREATE POLICY "allow_all" ON licensing_invoices FOR ALL TO anon USING (true) WITH CHECK (true);
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;`;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+CREATE TABLE IF NOT EXISTS uob_payments (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY, date date NOT NULL, invoice_number text NOT NULL, amount numeric(10,2) NOT NULL, created_at timestamptz DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS ocbc_payments (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY, date date NOT NULL, invoice_number text NOT NULL, amount numeric(10,2) NOT NULL, created_at timestamptz DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS salary_payments (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY, date date NOT NULL, name text NOT NULL, amount numeric(10,2) NOT NULL, created_at timestamptz DEFAULT now()
+);
+ALTER TABLE uob_payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ocbc_payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE salary_payments ENABLE ROW LEVEL SECURITY;
+DO $$ BEGIN CREATE POLICY "allow_all" ON uob_payments FOR ALL TO anon USING (true) WITH CHECK (true); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE POLICY "allow_all" ON ocbc_payments FOR ALL TO anon USING (true) WITH CHECK (true); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE POLICY "allow_all" ON salary_payments FOR ALL TO anon USING (true) WITH CHECK (true); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+`;
 
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
 // STATE
-let invoices = [], quotations = [], permits = [], roadtaxes = [], insurances = [], licensing = [];
+let invoices = [], permits = [], roadtaxes = [], insurances = [], licensing = [];
+let payData = {uob:[], ocbc:[], salary:[]}, payEdit = {uob:null, ocbc:null, salary:null};
+let invEdit = null;
 let invFilter = 'all', invSort = 'date', invSearch = '';
-let qtFilter  = 'all', qtSort  = 'date', qtSearch  = '';
 let liFilter  = 'all', liSort  = 'date', liSearch  = '';
 
 // AUTH
@@ -860,32 +765,19 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function isMissingTable(err) {
   if (!err) return false;
-  return err.code === '42P01' || (err.message||'').includes('does not exist') || (err.message||'').includes('relation');
+  return err.code === '42P01' || err.code === 'PGRST205' || (err.message||'').includes('does not exist') || (err.message||'').includes('relation') || (err.message||'').includes('schema cache');
 }
 async function initApp() {
   const noDb = `<tr><td colspan="99" class="empty" style="color:#B45309">Database not ready — please run the setup SQL above. / 请先运行上方设置SQL。</td></tr>`;
   const { error: chkInv } = await sb.from('invoices').select('id').limit(1);
   if (isMissingTable(chkInv)) {
     document.getElementById('setup-banner').style.display = 'block';
-    ['inv-tbody','qt-tbody','wp-tbody','rt-tbody','ins-tbody','li-tbody'].forEach(id => {
-      document.getElementById(id).innerHTML = noDb;
+    ['inv-tbody','wp-tbody','rt-tbody','ins-tbody','li-tbody','uob-tbody','ocbc-tbody','salary-tbody'].forEach(id => {
+      const e=document.getElementById(id); if(e) e.innerHTML = noDb;
     });
     return;
   }
-  // Check if the newer tables (quotations, licensing_invoices) have been added
-  const { error: chkQt } = await sb.from('quotations').select('id').limit(1);
-  if (isMissingTable(chkQt)) {
-    document.getElementById('setup-banner').style.display = 'block';
-    const newTablesMsg = `<tr><td colspan="99" class="empty" style="color:#B45309">New tables not set up — copy and run the setup SQL above (safe to re-run). / 请复制并运行上方SQL（可重复运行，不会影响已有数据）。</td></tr>`;
-    document.getElementById('qt-tbody').innerHTML = newTablesMsg;
-    document.getElementById('li-tbody').innerHTML = newTablesMsg;
-    await Promise.all([loadInvoices(), loadPermits(), loadRoadTax(), loadInsurance()]);
-    loadPrices();
-    refreshAlerts();
-    return;
-  }
-  await Promise.all([loadInvoices(), loadQuotations(), loadPermits(), loadRoadTax(), loadInsurance(), loadLicensing()]);
-  loadPrices();
+  await Promise.all([loadInvoices(), loadPermits(), loadRoadTax(), loadInsurance(), loadLicensing(), loadPay('uob'), loadPay('ocbc'), loadPay('salary')]);
   refreshAlerts();
 }
 
@@ -983,12 +875,20 @@ function renderInvoices() {
   rows = sortRows(rows, invSort);
   const tbody = document.getElementById('inv-tbody');
   if (!rows.length) { tbody.innerHTML=`<tr><td colspan="7" class="empty">No invoices / 暂无发票</td></tr>`; return; }
-  tbody.innerHTML = rows.map(r=>`<tr>
+  tbody.innerHTML = rows.map(r=> invEdit===r.id ? `<tr>
+    <td><input type="date" id="edi-date" value="${r.date}"></td>
+    <td><input type="text" id="edi-num" value="${escH(r.invoice_number)}"></td>
+    <td><input type="text" id="edi-co" value="${escH(r.company_name)}"></td>
+    <td><input type="number" step="0.01" min="0" id="edi-amt" value="${r.amount}"></td>
+    <td><span class="badge ${r.status==='paid'?'badge-paid':'badge-unpaid'}">${r.status==='paid'?'Paid / 已付款':'Unpaid / 未付款'}</span></td>
+    <td>${fmtDate(r.paid_date)}</td>
+    <td class="td-actions"><button class="btn btn-success btn-sm" onclick="saveEditInv('${r.id}')">Save / 保存</button><button class="btn btn-sm" onclick="cancelEditInv()">Cancel / 取消</button></td>
+  </tr>` : `<tr>
     <td>${fmtDate(r.date)}</td><td><strong>${escH(r.invoice_number)}</strong></td><td>${escH(r.company_name)}</td>
     <td><strong>$${parseFloat(r.amount).toFixed(2)}</strong></td>
     <td><span class="badge ${r.status==='paid'?'badge-paid':'badge-unpaid'}">${r.status==='paid'?'Paid / 已付款':'Unpaid / 未付款'}</span></td>
     <td>${fmtDate(r.paid_date)}</td>
-    <td class="td-actions">${r.status==='unpaid'?`<button class="btn btn-success btn-sm" onclick="markInvPaid('${r.id}')">Mark Paid / 标记付款</button>`:''}<button class="btn btn-danger btn-sm" onclick="delInvoice('${r.id}')">Delete / 删除</button></td>
+    <td class="td-actions"><button class="btn btn-sm" onclick="startEditInv('${r.id}')">Edit / 编辑</button>${r.status==='unpaid'?`<button class="btn btn-success btn-sm" onclick="markInvPaid('${r.id}')">Mark Paid / 标记付款</button>`:''}<button class="btn btn-danger btn-sm" onclick="delInvoice('${r.id}')">Delete / 删除</button></td>
   </tr>`).join('');
 }
 async function addInvoice() {
@@ -1009,60 +909,6 @@ async function delInvoice(id) {
   if (!confirm('Delete this invoice? / 确认删除此发票？')) return;
   const {error}=await sb.from('invoices').delete().eq('id',id);
   if (error) { showErr('inv-err','Error: '+error.message); return; } await loadInvoices();
-}
-
-// ── QUOTATIONS ──
-async function loadQuotations() {
-  const {data,error}=await sb.from('quotations').select('*').order('date',{ascending:false});
-  if (error) { console.error(error); return; }
-  quotations=data||[]; renderQuotations(); renderQtSummary();
-}
-function renderQtSummary() {
-  const total=quotations.reduce((s,i)=>s+parseFloat(i.amount),0);
-  const accepted=quotations.filter(i=>i.status==='accepted').reduce((s,i)=>s+parseFloat(i.amount),0);
-  document.getElementById('qt-summary').innerHTML = `
-    <div class="sum-item"><div class="sum-val">$${total.toFixed(2)}</div><div class="sum-lbl">Total Quoted</div><div class="sum-lbl-zh">报价总额</div></div>
-    <div class="sum-item"><div class="sum-val" style="color:#059669">$${accepted.toFixed(2)}</div><div class="sum-lbl">Accepted</div><div class="sum-lbl-zh">已接受</div></div>
-    <div class="sum-item"><div class="sum-val" style="color:#1E40AF">$${(total-accepted).toFixed(2)}</div><div class="sum-lbl">Pending</div><div class="sum-lbl-zh">待确认</div></div>
-    <div class="sum-item"><div class="sum-val">${quotations.length}</div><div class="sum-lbl">Total</div><div class="sum-lbl-zh">总数</div></div>
-    <div class="sum-item"><div class="sum-val" style="color:#1E40AF">${quotations.filter(i=>i.status==='pending').length}</div><div class="sum-lbl">Pending</div><div class="sum-lbl-zh">待确认</div></div>`;
-}
-function setQtFilter(f,btn) { qtFilter=f; btn.closest('.filter-bar').querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderQuotations(); }
-function setQtSort(s,btn)   { qtSort=s;  btn.closest('.sort-row').querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderQuotations(); }
-function setQtSearch(v) { qtSearch=v.trim().toLowerCase(); document.getElementById('qt-search-clear').style.display=qtSearch?'block':'none'; renderQuotations(); }
-function clearQtSearch() { qtSearch=''; document.getElementById('qt-search').value=''; document.getElementById('qt-search-clear').style.display='none'; renderQuotations(); }
-function renderQuotations() {
-  let rows=(qtFilter==='all'?quotations.slice():quotations.filter(i=>i.status===qtFilter));
-  if (qtSearch) rows=rows.filter(i=>i.quotation_number.toLowerCase().includes(qtSearch));
-  rows=sortRows(rows,qtSort);
-  const tbody=document.getElementById('qt-tbody');
-  if (!rows.length) { tbody.innerHTML=`<tr><td colspan="7" class="empty">No quotations / 暂无报价单</td></tr>`; return; }
-  tbody.innerHTML=rows.map(r=>`<tr>
-    <td>${fmtDate(r.date)}</td><td><strong>${escH(r.quotation_number)}</strong></td><td>${escH(r.company_name)}</td>
-    <td><strong>$${parseFloat(r.amount).toFixed(2)}</strong></td>
-    <td><span class="badge ${r.status==='accepted'?'badge-accepted':'badge-pending'}">${r.status==='accepted'?'Accepted / 已接受':'Pending / 待确认'}</span></td>
-    <td>${fmtDate(r.accepted_date)}</td>
-    <td class="td-actions">${r.status==='pending'?`<button class="btn btn-success btn-sm" onclick="markQtAccepted('${r.id}')">Mark Accepted / 标记已接受</button>`:''}<button class="btn btn-danger btn-sm" onclick="delQuotation('${r.id}')">Delete / 删除</button></td>
-  </tr>`).join('');
-}
-async function addQuotation() {
-  const date=document.getElementById('qt-date').value, quotation_number=document.getElementById('qt-number').value.trim(),
-        company_name=document.getElementById('qt-company').value.trim(), amount=parseFloat(document.getElementById('qt-amount').value);
-  if (!date||!quotation_number||!company_name||isNaN(amount)||amount<=0) { showErr('qt-err','Please fill in all fields. / 请填写所有字段。'); return; }
-  const {error}=await sb.from('quotations').insert({date,quotation_number,company_name,amount,status:'pending'});
-  if (error) { dbErr('qt-err',error); return; }
-  document.getElementById('qt-number').value=''; document.getElementById('qt-company').value=''; document.getElementById('qt-amount').value='';
-  await loadQuotations();
-}
-async function markQtAccepted(id) {
-  const today=new Date().toISOString().split('T')[0];
-  const {error}=await sb.from('quotations').update({status:'accepted',accepted_date:today}).eq('id',id);
-  if (error) { showErr('qt-err','Error: '+error.message); return; } await loadQuotations();
-}
-async function delQuotation(id) {
-  if (!confirm('Delete this quotation? / 确认删除此报价单？')) return;
-  const {error}=await sb.from('quotations').delete().eq('id',id);
-  if (error) { showErr('qt-err','Error: '+error.message); return; } await loadQuotations();
 }
 
 // ── WORK PERMITS ──
@@ -1220,25 +1066,52 @@ async function delLicensing(id) {
   if (error) { showErr('li-err','Error: '+error.message); return; } await loadLicensing();
 }
 
-// ── PRICES ──
-async function loadPrices() {
-  try {
-    const res=await fetch(PRICES_URL); if (!res.ok) throw new Error('HTTP '+res.status);
-    const data=await res.json();
-    document.getElementById('prices-meta').innerHTML=`Source: RenoRadar &nbsp;·&nbsp; Last Updated: <strong>${data.last_updated||'—'}</strong> &nbsp;|&nbsp; 来源：市场价格参考 &nbsp;·&nbsp; 最后更新：<strong>${data.last_updated||'—'}</strong>`;
-    const items=Object.values(data.items||{});
-    if (!items.length) { document.getElementById('prices-tbody').innerHTML=`<tr><td colspan="6" class="empty">No price data / 暂无价格数据</td></tr>`; return; }
-    document.getElementById('prices-tbody').innerHTML=items.map(it=>`<tr>
-      <td><strong>${escH(it.name)}</strong></td><td style="color:var(--muted)">${escH(it.unit)}</td>
-      <td>$${it.tier_budget.min}–$${it.tier_budget.max}</td>
-      <td>$${it.tier_mid.min}–$${it.tier_mid.max}</td>
-      <td>$${it.tier_premium.min}–$${it.tier_premium.max}</td>
-      <td class="avg-cell">$${it.market_avg}</td>
-    </tr>`).join('');
-  } catch(e) {
-    document.getElementById('prices-meta').textContent='Prices not yet available / 价格暂未更新';
-    document.getElementById('prices-tbody').innerHTML=`<tr><td colspan="6" class="empty" style="color:var(--muted)">Run the RenoRadar weekly update to populate this tab.<br><span style="font-family:'Noto Sans SC',sans-serif;font-size:0.85em">请先运行RenoRadar每周更新以载入价格。</span></td></tr>`;
-  }
+// ── INVOICE INLINE EDIT ──
+function startEditInv(id){ invEdit=id; renderInvoices(); }
+function cancelEditInv(){ invEdit=null; renderInvoices(); }
+async function saveEditInv(id){
+  const date=document.getElementById('edi-date').value, invoice_number=document.getElementById('edi-num').value.trim(),
+        company_name=document.getElementById('edi-co').value.trim(), amount=parseFloat(document.getElementById('edi-amt').value);
+  if(!date||!invoice_number||!company_name||isNaN(amount)||amount<=0){ alert('Please fill in all fields. / 请填写所有字段。'); return; }
+  const {error}=await sb.from('invoices').update({date,invoice_number,company_name,amount}).eq('id',id);
+  if(error){ alert('Error: '+error.message); return; }
+  invEdit=null; await loadInvoices();
+}
+
+// ── UOB / OCBC / SALARY (generic payment tabs, editable) ──
+const PAYTABS={ uob:{table:'uob_payments',f2:'invoice_number'}, ocbc:{table:'ocbc_payments',f2:'invoice_number'}, salary:{table:'salary_payments',f2:'name'} };
+async function loadPay(k){ const c=PAYTABS[k]; const tb=document.getElementById(k+'-tbody'); if(!tb) return;
+  const {data,error}=await sb.from(c.table).select('*').order('date',{ascending:false});
+  if(error){ if(isMissingTable(error)){ tb.innerHTML=`<tr><td colspan="4" class="empty" style="color:#B45309">Run the setup SQL above to create this table. / 请运行上方SQL以创建此表。</td></tr>`; document.getElementById('setup-banner').style.display='block'; } else { console.error(error); } return; }
+  payData[k]=data||[]; renderPay(k);
+}
+function renderPay(k){ const c=PAYTABS[k], rows=payData[k]||[], tb=document.getElementById(k+'-tbody'); if(!tb) return;
+  const total=rows.reduce((s,r)=>s+parseFloat(r.amount||0),0);
+  const sm=document.getElementById(k+'-summary'); if(sm) sm.innerHTML=`<div class="sum-item"><div class="sum-val">$${total.toFixed(2)}</div><div class="sum-lbl">Total</div><div class="sum-lbl-zh">总额</div></div><div class="sum-item"><div class="sum-val">${rows.length}</div><div class="sum-lbl">Entries</div><div class="sum-lbl-zh">条目</div></div>`;
+  if(!rows.length){ tb.innerHTML=`<tr><td colspan="4" class="empty">No entries / 暂无记录</td></tr>`; return; }
+  tb.innerHTML=rows.map(r=> payEdit[k]===r.id
+    ? `<tr><td><input type="date" id="edp-${k}-date" value="${r.date}"></td><td><input type="text" id="edp-${k}-f2" value="${escH(r[c.f2])}"></td><td><input type="number" step="0.01" min="0" id="edp-${k}-amt" value="${r.amount}"></td><td class="td-actions"><button class="btn btn-success btn-sm" onclick="saveEditPay('${k}','${r.id}')">Save / 保存</button><button class="btn btn-sm" onclick="cancelEditPay('${k}')">Cancel / 取消</button></td></tr>`
+    : `<tr><td>${fmtDate(r.date)}</td><td><strong>${escH(r[c.f2])}</strong></td><td><strong>$${parseFloat(r.amount).toFixed(2)}</strong></td><td class="td-actions"><button class="btn btn-sm" onclick="startEditPay('${k}','${r.id}')">Edit / 编辑</button><button class="btn btn-danger btn-sm" onclick="delPay('${k}','${r.id}')">Delete / 删除</button></td></tr>`
+  ).join('');
+}
+function startEditPay(k,id){ payEdit[k]=id; renderPay(k); }
+function cancelEditPay(k){ payEdit[k]=null; renderPay(k); }
+async function saveEditPay(k,id){ const c=PAYTABS[k];
+  const date=document.getElementById('edp-'+k+'-date').value, f2=document.getElementById('edp-'+k+'-f2').value.trim(), amount=parseFloat(document.getElementById('edp-'+k+'-amt').value);
+  if(!date||!f2||isNaN(amount)||amount<=0){ alert('Please fill in all fields. / 请填写所有字段。'); return; }
+  const upd={date,amount}; upd[c.f2]=f2;
+  const {error}=await sb.from(c.table).update(upd).eq('id',id); if(error){ alert('Error: '+error.message); return; }
+  payEdit[k]=null; await loadPay(k);
+}
+async function addPay(k){ const c=PAYTABS[k];
+  const date=document.getElementById(k+'-date').value, f2=document.getElementById(k+'-f2').value.trim(), amount=parseFloat(document.getElementById(k+'-amt').value);
+  if(!date||!f2||isNaN(amount)||amount<=0){ showErr(k+'-err','Please fill in all fields. / 请填写所有字段。'); return; }
+  const ins={date,amount}; ins[c.f2]=f2;
+  const {error}=await sb.from(c.table).insert(ins); if(error){ dbErr(k+'-err',error); return; }
+  document.getElementById(k+'-f2').value=''; document.getElementById(k+'-amt').value=''; await loadPay(k);
+}
+async function delPay(k,id){ const c=PAYTABS[k]; if(!confirm('Delete this entry? / 确认删除？')) return;
+  const {error}=await sb.from(c.table).delete().eq('id',id); if(error){ alert('Error: '+error.message); return; } await loadPay(k);
 }
 </script>
 </body>

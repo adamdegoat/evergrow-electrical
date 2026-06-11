@@ -88,3 +88,26 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
   CREATE POLICY "allow_all" ON licensing_invoices FOR ALL TO anon USING (true) WITH CHECK (true);
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- ── NEW (2026-06): bank payments + salary/payments tabs ──
+CREATE TABLE IF NOT EXISTS uob_payments (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  date date NOT NULL, invoice_number text NOT NULL, amount numeric(10,2) NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS ocbc_payments (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  date date NOT NULL, invoice_number text NOT NULL, amount numeric(10,2) NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS salary_payments (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  date date NOT NULL, name text NOT NULL, amount numeric(10,2) NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+ALTER TABLE uob_payments    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ocbc_payments   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE salary_payments ENABLE ROW LEVEL SECURITY;
+DO $$ BEGIN CREATE POLICY "allow_all" ON uob_payments    FOR ALL TO anon USING (true) WITH CHECK (true); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE POLICY "allow_all" ON ocbc_payments   FOR ALL TO anon USING (true) WITH CHECK (true); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE POLICY "allow_all" ON salary_payments FOR ALL TO anon USING (true) WITH CHECK (true); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
