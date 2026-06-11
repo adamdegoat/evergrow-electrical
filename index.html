@@ -331,9 +331,6 @@
     <button class="tab-btn" onclick="showTab('ocbc',this)" id="tabn-ocbc">
       <span class="tab-en">OCBC</span><span class="tab-zh">华侨银行</span>
     </button>
-    <button class="tab-btn" onclick="showTab('salary',this)" id="tabn-salary">
-      <span class="tab-en">Salary &amp; Payments</span><span class="tab-zh">工资与付款</span>
-    </button>
   </nav>
 
   <main>
@@ -617,39 +614,6 @@
       </div>
     </div>
 
-    <!-- ══ SALARY & PAYMENTS ══ -->
-    <div class="tab-panel" id="panel-salary">
-      <div class="sec-head">
-        <div class="sec-title"><div class="en">Salary & Payments</div><div class="zh">工资与付款</div></div>
-      </div>
-      <div class="card">
-        <div class="card-title">➕ Add Payment <span class="zh">添加付款</span></div>
-        <div class="form-grid cols-3">
-          <label><div class="lbl-en">Date</div><div class="lbl-zh">日期</div><input type="date" id="salary-date"></label>
-          <label><div class="lbl-en">Name</div><div class="lbl-zh">姓名</div><input type="text" id="salary-f2" placeholder="Name / 姓名"></label>
-          <label><div class="lbl-en">Amount (SGD)</div><div class="lbl-zh">金额（新元）</div><input type="number" id="salary-amt" placeholder="0.00" step="0.01" min="0"></label>
-        </div>
-        <div class="form-actions">
-          <button class="btn btn-primary" onclick="addPay('salary')">Add / 添加</button>
-          <span class="form-err" id="salary-err"></span>
-        </div>
-      </div>
-      <div class="summary-bar" id="salary-summary"></div>
-      <div class="card">
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr>
-              <th>Date<span class="col-zh">日期</span></th>
-              <th>Name<span class="col-zh">姓名</span></th>
-              <th>Amount<span class="col-zh">金额</span></th>
-              <th>Actions<span class="col-zh">操作</span></th>
-            </tr></thead>
-            <tbody id="salary-tbody"><tr><td colspan="4" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
   </main>
 </div>
 
@@ -740,7 +704,7 @@ const sb = supabase.createClient(SB_URL, SB_KEY);
 
 // STATE
 let invoices = [], permits = [], roadtaxes = [], insurances = [], licensing = [];
-let payData = {uob:[], ocbc:[], salary:[]}, payEdit = {uob:null, ocbc:null, salary:null};
+let payData = {uob:[], ocbc:[]}, payEdit = {uob:null, ocbc:null};
 let invEdit = null, wpEdit = null, rtEdit = null, insEdit = null, liEdit = null;
 let invFilter = 'all', invSort = 'date', invSearch = '';
 let liFilter  = 'all', liSort  = 'date', liSearch  = '';
@@ -789,12 +753,12 @@ async function initApp() {
   const { error: chkInv } = await sb.from('invoices').select('id').limit(1);
   if (isMissingTable(chkInv)) {
     document.getElementById('setup-banner').style.display = 'block';
-    ['inv-tbody','wp-tbody','rt-tbody','ins-tbody','li-tbody','uob-tbody','ocbc-tbody','salary-tbody'].forEach(id => {
+    ['inv-tbody','wp-tbody','rt-tbody','ins-tbody','li-tbody','uob-tbody','ocbc-tbody'].forEach(id => {
       const e=document.getElementById(id); if(e) e.innerHTML = noDb;
     });
     return;
   }
-  await Promise.all([loadInvoices(), loadPermits(), loadRoadTax(), loadInsurance(), loadLicensing(), loadPay('uob'), loadPay('ocbc'), loadPay('salary')]);
+  await Promise.all([loadInvoices(), loadPermits(), loadRoadTax(), loadInsurance(), loadLicensing(), loadPay('uob'), loadPay('ocbc')]);
   refreshAlerts();
 }
 
@@ -1122,7 +1086,7 @@ async function saveEditInv(id){
 }
 
 // ── UOB / OCBC / SALARY (generic payment tabs, editable) ──
-const PAYTABS={ uob:{table:'uob_payments',f2:'invoice_number'}, ocbc:{table:'ocbc_payments',f2:'invoice_number'}, salary:{table:'salary_payments',f2:'name'} };
+const PAYTABS={ uob:{table:'uob_payments',f2:'invoice_number'}, ocbc:{table:'ocbc_payments',f2:'invoice_number'} };
 async function loadPay(k){ const c=PAYTABS[k]; const tb=document.getElementById(k+'-tbody'); if(!tb) return;
   const {data,error}=await sb.from(c.table).select('*').order('date',{ascending:false});
   if(error){ if(isMissingTable(error)){ tb.innerHTML=`<tr><td colspan="4" class="empty" style="color:#B45309">Run the setup SQL above to create this table. / 请运行上方SQL以创建此表。</td></tr>`; document.getElementById('setup-banner').style.display='block'; } else { console.error(error); } return; }
@@ -1208,8 +1172,7 @@ function exportPDF(){
   html+=sec('Invoices / 发票',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Invoice No.',f:r=>escH(r.invoice_number)},{h:'Company',f:r=>escH(r.company_name)},{h:'Amount',f:r=>money(r.amount)},{h:'Status',f:r=>r.status==='paid'?'Paid':'Unpaid'}],invoices,`Total ${money(invTot)} · Collected ${money(invPaid)} · Outstanding ${money(invTot-invPaid)}`);
   html+=sec('UOB Payments / 大华银行付款',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Invoice No.',f:r=>escH(r.invoice_number)},{h:'Amount',f:r=>money(r.amount)}],payData.uob,`Total ${money(t('uob'))}`);
   html+=sec('OCBC Payments / 华侨银行付款',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Invoice No.',f:r=>escH(r.invoice_number)},{h:'Amount',f:r=>money(r.amount)}],payData.ocbc,`Total ${money(t('ocbc'))}`);
-  html+=sec('Salary & Payments / 工资与付款',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Name',f:r=>escH(r.name)},{h:'Amount Out',f:r=>money(r.amount)}],payData.salary,`Total Out ${money(t('salary'))}`);
-  html+=sec('Licensing Invoices / 牌照发票',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Invoice No.',f:r=>escH(r.invoice_number)},{h:'Company',f:r=>escH(r.company_name)},{h:'Amount',f:r=>money(r.amount)},{h:'Status',f:r=>r.status==='paid'?'Paid':'Unpaid'}],licensing,`Total ${money(licensing.reduce((s,i)=>s+parseFloat(i.amount),0))}`);
+    html+=sec('Licensing Invoices / 牌照发票',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Invoice No.',f:r=>escH(r.invoice_number)},{h:'Company',f:r=>escH(r.company_name)},{h:'Amount',f:r=>money(r.amount)},{h:'Status',f:r=>r.status==='paid'?'Paid':'Unpaid'}],licensing,`Total ${money(licensing.reduce((s,i)=>s+parseFloat(i.amount),0))}`);
   html+=sec('Work Permits / 工作准证',[{h:'Worker',f:r=>escH(r.worker_name)},{h:'Permit No.',f:r=>escH(r.permit_number)},{h:'Expiry',f:r=>fmtDate(r.expiry_date)}],permits,'');
   html+=sec('Road Tax / 道路税',[{h:'Plate',f:r=>escH(r.plate_number)},{h:'Description',f:r=>escH(r.description||'')},{h:'Expiry',f:r=>fmtDate(r.expiry_date)}],roadtaxes,'');
   html+=sec('Insurance / 保险',[{h:'Policy',f:r=>escH(r.policy_name)},{h:'Provider',f:r=>escH(r.provider)},{h:'Start',f:r=>fmtDate(r.start_date)},{h:'Expiry',f:r=>fmtDate(r.expiry_date)}],insurances,'');
