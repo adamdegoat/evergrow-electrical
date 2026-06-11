@@ -240,6 +240,23 @@
     .spinner { display: inline-block; width: 15px; height: 15px; border: 2px solid var(--border); border-top-color: var(--yellow); border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 5px; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
+<style>
+  #print-area{ display:none; }
+  .pr-head h1{ font-size:20px; margin:0 0 2px; }
+  .pr-date{ font-size:12px; color:#555; margin-bottom:14px; }
+  .pr-h2{ font-size:14px; border-bottom:2px solid #333; padding-bottom:3px; margin:18px 0 6px; }
+  .pr-sum{ font-size:11px; font-weight:400; color:#555; }
+  .pr-empty{ font-size:11px; color:#888; padding:4px 0; }
+  .pr-tbl{ width:100%; border-collapse:collapse; font-size:11px; margin-bottom:6px; }
+  .pr-tbl th, .pr-tbl td{ border:1px solid #bbb; padding:4px 6px; text-align:left; }
+  .pr-tbl th{ background:#f1f1f1; }
+  @media print{
+    body > *:not(#print-area){ display:none !important; }
+    #print-area{ display:block !important; padding:0; color:#111; font-family:Inter,Arial,sans-serif; }
+    @page{ margin:14mm; }
+    .pr-h2{ page-break-after:avoid; } .pr-tbl tr{ page-break-inside:avoid; }
+  }
+</style>
 </head>
 <body>
 
@@ -288,7 +305,8 @@
       <polygon points="35,9 21,30 29,30 25,51 39,30 31,30" fill="#1E293B"/>
     </svg>
     <div class="hdr-name">Evergrow Electrical Service</div>
-    <button class="logout-btn" onclick="doLogout()">Logout / 登出</button>
+    <button class="logout-btn" onclick="exportPDF()" style="margin-left:auto;background:#1E293B;color:#fff">🖨 Export PDF / 导出报告</button>
+    <button class="logout-btn" onclick="doLogout()" style="margin-left:8px">Logout / 登出</button>
   </header>
 
   <nav>
@@ -365,10 +383,9 @@
               <th>Company<span class="col-zh">公司</span></th>
               <th>Amount<span class="col-zh">金额</span></th>
               <th>Status<span class="col-zh">状态</span></th>
-              <th>Paid On<span class="col-zh">付款日期</span></th>
               <th>Actions<span class="col-zh">操作</span></th>
             </tr></thead>
-            <tbody id="inv-tbody"><tr><td colspan="7" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
+            <tbody id="inv-tbody"><tr><td colspan="6" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -724,7 +741,7 @@ const sb = supabase.createClient(SB_URL, SB_KEY);
 // STATE
 let invoices = [], permits = [], roadtaxes = [], insurances = [], licensing = [];
 let payData = {uob:[], ocbc:[], salary:[]}, payEdit = {uob:null, ocbc:null, salary:null};
-let invEdit = null;
+let invEdit = null, wpEdit = null, rtEdit = null, insEdit = null, liEdit = null;
 let invFilter = 'all', invSort = 'date', invSearch = '';
 let liFilter  = 'all', liSort  = 'date', liSearch  = '';
 
@@ -874,20 +891,18 @@ function renderInvoices() {
   if (invSearch) rows=rows.filter(i=>i.invoice_number.toLowerCase().includes(invSearch));
   rows = sortRows(rows, invSort);
   const tbody = document.getElementById('inv-tbody');
-  if (!rows.length) { tbody.innerHTML=`<tr><td colspan="7" class="empty">No invoices / 暂无发票</td></tr>`; return; }
+  if (!rows.length) { tbody.innerHTML=`<tr><td colspan="6" class="empty">No invoices / 暂无发票</td></tr>`; return; }
   tbody.innerHTML = rows.map(r=> invEdit===r.id ? `<tr>
     <td><input type="date" id="edi-date" value="${r.date}"></td>
     <td><input type="text" id="edi-num" value="${escH(r.invoice_number)}"></td>
     <td><input type="text" id="edi-co" value="${escH(r.company_name)}"></td>
     <td><input type="number" step="0.01" min="0" id="edi-amt" value="${r.amount}"></td>
     <td><span class="badge ${r.status==='paid'?'badge-paid':'badge-unpaid'}">${r.status==='paid'?'Paid / 已付款':'Unpaid / 未付款'}</span></td>
-    <td>${fmtDate(r.paid_date)}</td>
     <td class="td-actions"><button class="btn btn-success btn-sm" onclick="saveEditInv('${r.id}')">Save / 保存</button><button class="btn btn-sm" onclick="cancelEditInv()">Cancel / 取消</button></td>
   </tr>` : `<tr>
     <td>${fmtDate(r.date)}</td><td><strong>${escH(r.invoice_number)}</strong></td><td>${escH(r.company_name)}</td>
     <td><strong>$${parseFloat(r.amount).toFixed(2)}</strong></td>
     <td><span class="badge ${r.status==='paid'?'badge-paid':'badge-unpaid'}">${r.status==='paid'?'Paid / 已付款':'Unpaid / 未付款'}</span></td>
-    <td>${fmtDate(r.paid_date)}</td>
     <td class="td-actions"><button class="btn btn-sm" onclick="startEditInv('${r.id}')">Edit / 编辑</button>${r.status==='unpaid'?`<button class="btn btn-success btn-sm" onclick="markInvPaid('${r.id}')">Mark Paid / 标记付款</button>`:''}<button class="btn btn-danger btn-sm" onclick="delInvoice('${r.id}')">Delete / 删除</button></td>
   </tr>`).join('');
 }
@@ -920,10 +935,16 @@ async function loadPermits() {
 function renderPermits() {
   const tbody=document.getElementById('wp-tbody');
   if (!permits.length) { tbody.innerHTML=`<tr><td colspan="5" class="empty">No permits on record / 暂无准证记录</td></tr>`; return; }
-  tbody.innerHTML=permits.map(p=>`<tr>
+  tbody.innerHTML=permits.map(p=> wpEdit===p.id ? `<tr>
+    <td><input type="text" id="edwp-name" value="${escH(p.worker_name)}"></td>
+    <td><input type="text" id="edwp-permit" value="${escH(p.permit_number)}"></td>
+    <td><input type="date" id="edwp-expiry" value="${p.expiry_date}"></td>
+    <td>${expiryBadge(daysUntil(p.expiry_date))}</td>
+    <td class="td-actions"><button class="btn btn-success btn-sm" onclick="saveEditPermit('${p.id}')">Save / 保存</button><button class="btn btn-sm" onclick="cancelEditPermit()">Cancel / 取消</button></td>
+  </tr>` : `<tr>
     <td><strong>${escH(p.worker_name)}</strong></td><td>${escH(p.permit_number)}</td>
     <td>${fmtDate(p.expiry_date)}</td><td>${expiryBadge(daysUntil(p.expiry_date))}</td>
-    <td><button class="btn btn-danger btn-sm" onclick="delPermit('${p.id}')">Delete / 删除</button></td>
+    <td class="td-actions"><button class="btn btn-sm" onclick="startEditPermit('${p.id}')">Edit / 编辑</button><button class="btn btn-danger btn-sm" onclick="delPermit('${p.id}')">Delete / 删除</button></td>
   </tr>`).join('');
 }
 async function addPermit() {
@@ -952,10 +973,16 @@ async function loadRoadTax() {
 function renderRoadTax() {
   const tbody=document.getElementById('rt-tbody');
   if (!roadtaxes.length) { tbody.innerHTML=`<tr><td colspan="5" class="empty">No vehicles on record / 暂无车辆记录</td></tr>`; return; }
-  tbody.innerHTML=roadtaxes.map(r=>`<tr>
+  tbody.innerHTML=roadtaxes.map(r=> rtEdit===r.id ? `<tr>
+    <td><input type="text" id="edrt-plate" value="${escH(r.plate_number)}"></td>
+    <td><input type="text" id="edrt-desc" value="${escH(r.description||'')}"></td>
+    <td><input type="date" id="edrt-expiry" value="${r.expiry_date}"></td>
+    <td>${expiryBadge(daysUntil(r.expiry_date))}</td>
+    <td class="td-actions"><button class="btn btn-success btn-sm" onclick="saveEditRoadTax('${r.id}')">Save / 保存</button><button class="btn btn-sm" onclick="cancelEditRoadTax()">Cancel / 取消</button></td>
+  </tr>` : `<tr>
     <td><strong>${escH(r.plate_number)}</strong></td><td>${r.description?escH(r.description):'—'}</td>
     <td>${fmtDate(r.expiry_date)}</td><td>${expiryBadge(daysUntil(r.expiry_date))}</td>
-    <td><button class="btn btn-danger btn-sm" onclick="delRoadTax('${r.id}')">Delete / 删除</button></td>
+    <td class="td-actions"><button class="btn btn-sm" onclick="startEditRoadTax('${r.id}')">Edit / 编辑</button><button class="btn btn-danger btn-sm" onclick="delRoadTax('${r.id}')">Delete / 删除</button></td>
   </tr>`).join('');
 }
 async function addRoadTax() {
@@ -984,12 +1011,20 @@ async function loadInsurance() {
 function renderInsurance() {
   const tbody=document.getElementById('ins-tbody');
   if (!insurances.length) { tbody.innerHTML=`<tr><td colspan="7" class="empty">No policies on record / 暂无保险记录</td></tr>`; return; }
-  tbody.innerHTML=insurances.map(i=>`<tr>
+  tbody.innerHTML=insurances.map(i=> insEdit===i.id ? `<tr>
+    <td><input type="text" id="edins-name" value="${escH(i.policy_name)}"></td>
+    <td><input type="text" id="edins-provider" value="${escH(i.provider)}"></td>
+    <td><input type="date" id="edins-start" value="${i.start_date}"></td>
+    <td><input type="date" id="edins-expiry" value="${i.expiry_date}"></td>
+    <td>${expiryBadge(daysUntil(i.expiry_date))}</td>
+    <td><input type="text" id="edins-notes" value="${escH(i.notes||'')}" style="max-width:160px"></td>
+    <td class="td-actions"><button class="btn btn-success btn-sm" onclick="saveEditInsurance('${i.id}')">Save / 保存</button><button class="btn btn-sm" onclick="cancelEditInsurance()">Cancel / 取消</button></td>
+  </tr>` : `<tr>
     <td><strong>${escH(i.policy_name)}</strong></td><td>${escH(i.provider)}</td>
     <td>${fmtDate(i.start_date)}</td><td>${fmtDate(i.expiry_date)}</td>
     <td>${expiryBadge(daysUntil(i.expiry_date))}</td>
     <td style="max-width:180px;font-size:0.79rem;color:var(--muted)">${i.notes?escH(i.notes):'—'}</td>
-    <td><button class="btn btn-danger btn-sm" onclick="delInsurance('${i.id}')">Delete / 删除</button></td>
+    <td class="td-actions"><button class="btn btn-sm" onclick="startEditInsurance('${i.id}')">Edit / 编辑</button><button class="btn btn-danger btn-sm" onclick="delInsurance('${i.id}')">Delete / 删除</button></td>
   </tr>`).join('');
 }
 async function addInsurance() {
@@ -1038,12 +1073,20 @@ function renderLicensing() {
   rows=sortRows(rows,liSort);
   const tbody=document.getElementById('li-tbody');
   if (!rows.length) { tbody.innerHTML=`<tr><td colspan="7" class="empty">No licensing invoices / 暂无牌照发票</td></tr>`; return; }
-  tbody.innerHTML=rows.map(r=>`<tr>
+  tbody.innerHTML=rows.map(r=> liEdit===r.id ? `<tr>
+    <td><input type="date" id="edli-date" value="${r.date}"></td>
+    <td><input type="text" id="edli-num" value="${escH(r.invoice_number)}"></td>
+    <td><input type="text" id="edli-co" value="${escH(r.company_name)}"></td>
+    <td><input type="number" step="0.01" min="0" id="edli-amt" value="${r.amount}"></td>
+    <td><span class="badge ${r.status==='paid'?'badge-paid':'badge-unpaid'}">${r.status==='paid'?'Paid / 已付款':'Unpaid / 未付款'}</span></td>
+    <td>${fmtDate(r.paid_date)}</td>
+    <td class="td-actions"><button class="btn btn-success btn-sm" onclick="saveEditLicensing('${r.id}')">Save / 保存</button><button class="btn btn-sm" onclick="cancelEditLicensing()">Cancel / 取消</button></td>
+  </tr>` : `<tr>
     <td>${fmtDate(r.date)}</td><td><strong>${escH(r.invoice_number)}</strong></td><td>${escH(r.company_name)}</td>
     <td><strong>$${parseFloat(r.amount).toFixed(2)}</strong></td>
     <td><span class="badge ${r.status==='paid'?'badge-paid':'badge-unpaid'}">${r.status==='paid'?'Paid / 已付款':'Unpaid / 未付款'}</span></td>
     <td>${fmtDate(r.paid_date)}</td>
-    <td class="td-actions">${r.status==='unpaid'?`<button class="btn btn-success btn-sm" onclick="markLiPaid('${r.id}')">Mark Paid / 标记付款</button>`:''}<button class="btn btn-danger btn-sm" onclick="delLicensing('${r.id}')">Delete / 删除</button></td>
+    <td class="td-actions"><button class="btn btn-sm" onclick="startEditLicensing('${r.id}')">Edit / 编辑</button>${r.status==='unpaid'?`<button class="btn btn-success btn-sm" onclick="markLiPaid('${r.id}')">Mark Paid / 标记付款</button>`:''}<button class="btn btn-danger btn-sm" onclick="delLicensing('${r.id}')">Delete / 删除</button></td>
   </tr>`).join('');
 }
 async function addLicensing() {
@@ -1112,6 +1155,67 @@ async function addPay(k){ const c=PAYTABS[k];
 }
 async function delPay(k,id){ const c=PAYTABS[k]; if(!confirm('Delete this entry? / 确认删除？')) return;
   const {error}=await sb.from(c.table).delete().eq('id',id); if(error){ alert('Error: '+error.message); return; } await loadPay(k);
+}
+
+// ── INLINE EDIT: permits / road tax / insurance / licensing ──
+function startEditPermit(id){ wpEdit=id; renderPermits(); }
+function cancelEditPermit(){ wpEdit=null; renderPermits(); }
+async function saveEditPermit(id){
+  const worker_name=document.getElementById('edwp-name').value.trim(), permit_number=document.getElementById('edwp-permit').value.trim(), expiry_date=document.getElementById('edwp-expiry').value;
+  if(!worker_name||!permit_number||!expiry_date){ alert('Please fill in all fields. / 请填写所有字段。'); return; }
+  const {error}=await sb.from('work_permits').update({worker_name,permit_number,expiry_date}).eq('id',id);
+  if(error){ alert('Error: '+error.message); return; } wpEdit=null; await loadPermits(); refreshAlerts();
+}
+function startEditRoadTax(id){ rtEdit=id; renderRoadTax(); }
+function cancelEditRoadTax(){ rtEdit=null; renderRoadTax(); }
+async function saveEditRoadTax(id){
+  const plate_number=document.getElementById('edrt-plate').value.trim().toUpperCase(), description=document.getElementById('edrt-desc').value.trim(), expiry_date=document.getElementById('edrt-expiry').value;
+  if(!plate_number||!expiry_date){ alert('Plate number and expiry date required. / 请填写车牌号和到期日。'); return; }
+  const {error}=await sb.from('road_tax').update({plate_number,description,expiry_date}).eq('id',id);
+  if(error){ alert('Error: '+error.message); return; } rtEdit=null; await loadRoadTax(); refreshAlerts();
+}
+function startEditInsurance(id){ insEdit=id; renderInsurance(); }
+function cancelEditInsurance(){ insEdit=null; renderInsurance(); }
+async function saveEditInsurance(id){
+  const policy_name=document.getElementById('edins-name').value.trim(), provider=document.getElementById('edins-provider').value.trim(), start_date=document.getElementById('edins-start').value, expiry_date=document.getElementById('edins-expiry').value, notes=document.getElementById('edins-notes').value.trim();
+  if(!policy_name||!provider||!start_date||!expiry_date){ alert('Please fill in all required fields. / 请填写必填字段。'); return; }
+  const {error}=await sb.from('insurance_policies').update({policy_name,provider,start_date,expiry_date,notes}).eq('id',id);
+  if(error){ alert('Error: '+error.message); return; } insEdit=null; await loadInsurance(); refreshAlerts();
+}
+function startEditLicensing(id){ liEdit=id; renderLicensing(); }
+function cancelEditLicensing(){ liEdit=null; renderLicensing(); }
+async function saveEditLicensing(id){
+  const date=document.getElementById('edli-date').value, invoice_number=document.getElementById('edli-num').value.trim(), company_name=document.getElementById('edli-co').value.trim(), amount=parseFloat(document.getElementById('edli-amt').value);
+  if(!date||!invoice_number||!company_name||isNaN(amount)||amount<=0){ alert('Please fill in all fields. / 请填写所有字段。'); return; }
+  const {error}=await sb.from('licensing_invoices').update({date,invoice_number,company_name,amount}).eq('id',id);
+  if(error){ alert('Error: '+error.message); return; } liEdit=null; await loadLicensing();
+}
+
+// ── EXPORT: one dated PDF with every tab ──
+function exportPDF(){
+  const stamp=new Date().toLocaleString('en-GB',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const money=v=>'$'+parseFloat(v||0).toFixed(2);
+  function sec(title, cols, rows, summary){
+    let h=`<h2 class="pr-h2">${title}${summary?` <span class="pr-sum">— ${summary}</span>`:''}</h2>`;
+    if(!rows||!rows.length) return h+`<div class="pr-empty">No records / 暂无记录</div>`;
+    h+='<table class="pr-tbl"><thead><tr>'+cols.map(c=>`<th>${c.h}</th>`).join('')+'</tr></thead><tbody>';
+    h+=rows.map(r=>'<tr>'+cols.map(c=>`<td>${c.f(r)}</td>`).join('')+'</tr>').join('');
+    return h+'</tbody></table>';
+  }
+  const invTot=invoices.reduce((s,i)=>s+parseFloat(i.amount),0), invPaid=invoices.filter(i=>i.status==='paid').reduce((s,i)=>s+parseFloat(i.amount),0);
+  const t=k=>(payData[k]||[]).reduce((s,r)=>s+parseFloat(r.amount),0);
+  let html=`<div class="pr-head"><h1>Evergrow Electrical Service — Records Report</h1><div class="pr-date">Generated: ${stamp}</div></div>`;
+  html+=sec('Invoices / 发票',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Invoice No.',f:r=>escH(r.invoice_number)},{h:'Company',f:r=>escH(r.company_name)},{h:'Amount',f:r=>money(r.amount)},{h:'Status',f:r=>r.status==='paid'?'Paid':'Unpaid'}],invoices,`Total ${money(invTot)} · Collected ${money(invPaid)} · Outstanding ${money(invTot-invPaid)}`);
+  html+=sec('UOB Payments / 大华银行付款',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Invoice No.',f:r=>escH(r.invoice_number)},{h:'Amount',f:r=>money(r.amount)}],payData.uob,`Total ${money(t('uob'))}`);
+  html+=sec('OCBC Payments / 华侨银行付款',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Invoice No.',f:r=>escH(r.invoice_number)},{h:'Amount',f:r=>money(r.amount)}],payData.ocbc,`Total ${money(t('ocbc'))}`);
+  html+=sec('Salary & Payments / 工资与付款',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Name',f:r=>escH(r.name)},{h:'Amount Out',f:r=>money(r.amount)}],payData.salary,`Total Out ${money(t('salary'))}`);
+  html+=sec('Licensing Invoices / 牌照发票',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Invoice No.',f:r=>escH(r.invoice_number)},{h:'Company',f:r=>escH(r.company_name)},{h:'Amount',f:r=>money(r.amount)},{h:'Status',f:r=>r.status==='paid'?'Paid':'Unpaid'}],licensing,`Total ${money(licensing.reduce((s,i)=>s+parseFloat(i.amount),0))}`);
+  html+=sec('Work Permits / 工作准证',[{h:'Worker',f:r=>escH(r.worker_name)},{h:'Permit No.',f:r=>escH(r.permit_number)},{h:'Expiry',f:r=>fmtDate(r.expiry_date)}],permits,'');
+  html+=sec('Road Tax / 道路税',[{h:'Plate',f:r=>escH(r.plate_number)},{h:'Description',f:r=>escH(r.description||'')},{h:'Expiry',f:r=>fmtDate(r.expiry_date)}],roadtaxes,'');
+  html+=sec('Insurance / 保险',[{h:'Policy',f:r=>escH(r.policy_name)},{h:'Provider',f:r=>escH(r.provider)},{h:'Start',f:r=>fmtDate(r.start_date)},{h:'Expiry',f:r=>fmtDate(r.expiry_date)}],insurances,'');
+  let pa=document.getElementById('print-area'); if(!pa){ pa=document.createElement('div'); pa.id='print-area'; document.body.appendChild(pa); }
+  pa.innerHTML=html;
+  window.print();
 }
 </script>
 </body>
