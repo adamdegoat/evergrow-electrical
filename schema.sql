@@ -97,12 +97,12 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- ── NEW (2026-06): bank payments + salary/payments tabs ──
 CREATE TABLE IF NOT EXISTS uob_payments (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  date date NOT NULL, invoice_number text NOT NULL, amount numeric(10,2) NOT NULL,
+  date date, invoice_number text, name text, amount numeric(10,2),
   created_at timestamptz DEFAULT now()
 );
 CREATE TABLE IF NOT EXISTS ocbc_payments (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  date date NOT NULL, invoice_number text NOT NULL, amount numeric(10,2) NOT NULL,
+  date date, invoice_number text, name text, amount numeric(10,2),
   created_at timestamptz DEFAULT now()
 );
 CREATE TABLE IF NOT EXISTS salary_payments (
@@ -116,3 +116,16 @@ ALTER TABLE salary_payments ENABLE ROW LEVEL SECURITY;
 DO $$ BEGIN CREATE POLICY "allow_all" ON uob_payments    FOR ALL TO anon USING (true) WITH CHECK (true); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN CREATE POLICY "allow_all" ON ocbc_payments   FOR ALL TO anon USING (true) WITH CHECK (true); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN CREATE POLICY "allow_all" ON salary_payments FOR ALL TO anon USING (true) WITH CHECK (true); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- ── MIGRATION (2026-06): bank-payment Name column + allow any field to be left blank ──
+-- Safe to re-run. Adds the Name column to UOB/OCBC and drops all NOT NULL rules so
+-- partial entries are accepted. Does NOT touch or delete any existing rows.
+ALTER TABLE uob_payments  ADD COLUMN IF NOT EXISTS name text;
+ALTER TABLE ocbc_payments ADD COLUMN IF NOT EXISTS name text;
+ALTER TABLE invoices           ALTER COLUMN date DROP NOT NULL, ALTER COLUMN invoice_number DROP NOT NULL, ALTER COLUMN company_name DROP NOT NULL, ALTER COLUMN amount DROP NOT NULL;
+ALTER TABLE work_permits       ALTER COLUMN worker_name DROP NOT NULL, ALTER COLUMN permit_number DROP NOT NULL, ALTER COLUMN expiry_date DROP NOT NULL;
+ALTER TABLE road_tax           ALTER COLUMN plate_number DROP NOT NULL, ALTER COLUMN expiry_date DROP NOT NULL;
+ALTER TABLE insurance_policies ALTER COLUMN policy_name DROP NOT NULL, ALTER COLUMN provider DROP NOT NULL, ALTER COLUMN start_date DROP NOT NULL, ALTER COLUMN expiry_date DROP NOT NULL;
+ALTER TABLE licensing_invoices ALTER COLUMN date DROP NOT NULL, ALTER COLUMN invoice_number DROP NOT NULL, ALTER COLUMN company_name DROP NOT NULL, ALTER COLUMN amount DROP NOT NULL;
+ALTER TABLE uob_payments       ALTER COLUMN date DROP NOT NULL, ALTER COLUMN invoice_number DROP NOT NULL, ALTER COLUMN amount DROP NOT NULL;
+ALTER TABLE ocbc_payments      ALTER COLUMN date DROP NOT NULL, ALTER COLUMN invoice_number DROP NOT NULL, ALTER COLUMN amount DROP NOT NULL;

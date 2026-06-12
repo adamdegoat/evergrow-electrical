@@ -563,6 +563,7 @@
         <div class="form-grid cols-3">
           <label><div class="lbl-en">Date</div><div class="lbl-zh">日期</div><input type="date" id="uob-date"></label>
           <label><div class="lbl-en">Invoice Number</div><div class="lbl-zh">发票号码</div><input type="text" id="uob-f2" placeholder="INV-001"></label>
+          <label><div class="lbl-en">Name</div><div class="lbl-zh">名称</div><input type="text" id="uob-name" placeholder="Name"></label>
           <label><div class="lbl-en">Amount (SGD)</div><div class="lbl-zh">金额（新元）</div><input type="number" id="uob-amt" placeholder="0.00" step="0.01" min="0"></label>
         </div>
         <div class="form-actions">
@@ -577,10 +578,11 @@
             <thead><tr>
               <th>Date<span class="col-zh">日期</span></th>
               <th>Invoice Number<span class="col-zh">发票号码</span></th>
+              <th>Name<span class="col-zh">名称</span></th>
               <th>Amount<span class="col-zh">金额</span></th>
               <th>Actions<span class="col-zh">操作</span></th>
             </tr></thead>
-            <tbody id="uob-tbody"><tr><td colspan="4" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
+            <tbody id="uob-tbody"><tr><td colspan="5" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -596,6 +598,7 @@
         <div class="form-grid cols-3">
           <label><div class="lbl-en">Date</div><div class="lbl-zh">日期</div><input type="date" id="ocbc-date"></label>
           <label><div class="lbl-en">Invoice Number</div><div class="lbl-zh">发票号码</div><input type="text" id="ocbc-f2" placeholder="INV-001"></label>
+          <label><div class="lbl-en">Name</div><div class="lbl-zh">名称</div><input type="text" id="ocbc-name" placeholder="Name"></label>
           <label><div class="lbl-en">Amount (SGD)</div><div class="lbl-zh">金额（新元）</div><input type="number" id="ocbc-amt" placeholder="0.00" step="0.01" min="0"></label>
         </div>
         <div class="form-actions">
@@ -610,10 +613,11 @@
             <thead><tr>
               <th>Date<span class="col-zh">日期</span></th>
               <th>Invoice Number<span class="col-zh">发票号码</span></th>
+              <th>Name<span class="col-zh">名称</span></th>
               <th>Amount<span class="col-zh">金额</span></th>
               <th>Actions<span class="col-zh">操作</span></th>
             </tr></thead>
-            <tbody id="ocbc-tbody"><tr><td colspan="4" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
+            <tbody id="ocbc-tbody"><tr><td colspan="5" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -706,6 +710,17 @@ ALTER TABLE salary_payments ENABLE ROW LEVEL SECURITY;
 DO $$ BEGIN CREATE POLICY "allow_all" ON uob_payments FOR ALL TO anon USING (true) WITH CHECK (true); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN CREATE POLICY "allow_all" ON ocbc_payments FOR ALL TO anon USING (true) WITH CHECK (true); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN CREATE POLICY "allow_all" ON salary_payments FOR ALL TO anon USING (true) WITH CHECK (true); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- bank-payment Name column + allow blank fields (safe to re-run; does not touch existing rows):
+ALTER TABLE uob_payments  ADD COLUMN IF NOT EXISTS name text;
+ALTER TABLE ocbc_payments ADD COLUMN IF NOT EXISTS name text;
+ALTER TABLE invoices           ALTER COLUMN date DROP NOT NULL, ALTER COLUMN invoice_number DROP NOT NULL, ALTER COLUMN company_name DROP NOT NULL, ALTER COLUMN amount DROP NOT NULL;
+ALTER TABLE work_permits       ALTER COLUMN worker_name DROP NOT NULL, ALTER COLUMN permit_number DROP NOT NULL, ALTER COLUMN expiry_date DROP NOT NULL;
+ALTER TABLE road_tax           ALTER COLUMN plate_number DROP NOT NULL, ALTER COLUMN expiry_date DROP NOT NULL;
+ALTER TABLE insurance_policies ALTER COLUMN policy_name DROP NOT NULL, ALTER COLUMN provider DROP NOT NULL, ALTER COLUMN start_date DROP NOT NULL, ALTER COLUMN expiry_date DROP NOT NULL;
+ALTER TABLE licensing_invoices ALTER COLUMN date DROP NOT NULL, ALTER COLUMN invoice_number DROP NOT NULL, ALTER COLUMN company_name DROP NOT NULL, ALTER COLUMN amount DROP NOT NULL;
+ALTER TABLE uob_payments       ALTER COLUMN date DROP NOT NULL, ALTER COLUMN invoice_number DROP NOT NULL, ALTER COLUMN amount DROP NOT NULL;
+ALTER TABLE ocbc_payments      ALTER COLUMN date DROP NOT NULL, ALTER COLUMN invoice_number DROP NOT NULL, ALTER COLUMN amount DROP NOT NULL;
 `;
 
 const sb = supabase.createClient(SB_URL, SB_KEY);
@@ -800,7 +815,10 @@ function fmtDate(d) {
   const [y,m,day] = d.split('-');
   return `${parseInt(day)} ${['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)]} ${y}`;
 }
-function escH(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escH(s) { return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtAmt(v){ return (v===null||v===undefined||v===''||isNaN(parseFloat(v)))?'—':'$'+parseFloat(v).toFixed(2); }
+function orNull(v){ return (v===''||v===undefined)?null:v; }            // empty date/text → null
+function numOrNull(v){ const n=parseFloat(v); return isNaN(n)?null:n; }  // empty/invalid amount → null
 function showErr(id, msg) {
   const el = document.getElementById(id); if (!el) return;
   el.textContent = msg; el.style.display = 'inline';
@@ -848,8 +866,8 @@ async function loadInvoices() {
   invoices = data || []; renderInvoices(); renderInvSummary();
 }
 function renderInvSummary() {
-  const total = invoices.reduce((s,i)=>s+parseFloat(i.amount),0);
-  const paid  = invoices.filter(i=>i.status==='paid').reduce((s,i)=>s+parseFloat(i.amount),0);
+  const total = invoices.reduce((s,i)=>s+parseFloat(i.amount||0),0);
+  const paid  = invoices.filter(i=>i.status==='paid').reduce((s,i)=>s+parseFloat(i.amount||0),0);
   document.getElementById('inv-summary').innerHTML = `
     <div class="sum-item"><div class="sum-val">$${total.toFixed(2)}</div><div class="sum-lbl">Total Invoiced</div><div class="sum-lbl-zh">发票总额</div></div>
     <div class="sum-item"><div class="sum-val" style="color:#059669">$${paid.toFixed(2)}</div><div class="sum-lbl">Collected</div><div class="sum-lbl-zh">已收款</div></div>
@@ -863,29 +881,28 @@ function setInvSearch(v) { invSearch=v.trim().toLowerCase(); document.getElement
 function clearInvSearch() { invSearch=''; document.getElementById('inv-search').value=''; document.getElementById('inv-search-clear').style.display='none'; renderInvoices(); }
 function renderInvoices() {
   let rows = (invFilter==='all'?invoices.slice():invoices.filter(i=>i.status===invFilter));
-  if (invSearch) rows=rows.filter(i=>i.invoice_number.toLowerCase().includes(invSearch));
+  if (invSearch) rows=rows.filter(i=>(i.invoice_number||'').toLowerCase().includes(invSearch));
   rows = sortRows(rows, invSort);
   const tbody = document.getElementById('inv-tbody');
   if (!rows.length) { tbody.innerHTML=`<tr><td colspan="6" class="empty">No invoices / 暂无发票</td></tr>`; return; }
   tbody.innerHTML = rows.map(r=> invEdit===r.id ? `<tr>
-    <td><input type="date" id="edi-date" value="${r.date}"></td>
+    <td><input type="date" id="edi-date" value="${r.date||''}"></td>
     <td><input type="text" id="edi-num" value="${escH(r.invoice_number)}"></td>
     <td><input type="text" id="edi-co" value="${escH(r.company_name)}"></td>
-    <td><input type="number" step="0.01" min="0" id="edi-amt" value="${r.amount}"></td>
+    <td><input type="number" step="0.01" min="0" id="edi-amt" value="${r.amount??''}"></td>
     <td><span class="badge ${r.status==='paid'?'badge-paid':'badge-unpaid'}">${r.status==='paid'?'Paid / 已付款':'Unpaid / 未付款'}</span></td>
     <td class="td-actions"><button class="btn btn-success btn-sm" onclick="saveEditInv('${r.id}')">Save / 保存</button><button class="btn btn-sm" onclick="cancelEditInv()">Cancel / 取消</button></td>
   </tr>` : `<tr>
     <td>${fmtDate(r.date)}</td><td><strong>${escH(r.invoice_number)}</strong></td><td>${escH(r.company_name)}</td>
-    <td><strong>$${parseFloat(r.amount).toFixed(2)}</strong></td>
+    <td><strong>${fmtAmt(r.amount)}</strong></td>
     <td><span class="badge ${r.status==='paid'?'badge-paid':'badge-unpaid'}">${r.status==='paid'?'Paid / 已付款':'Unpaid / 未付款'}</span></td>
     <td class="td-actions"><button class="btn btn-sm" onclick="startEditInv('${r.id}')">Edit / 编辑</button>${r.status==='unpaid'?`<button class="btn btn-success btn-sm" onclick="markInvPaid('${r.id}')">Mark Paid / 标记付款</button>`:''}<button class="btn btn-danger btn-sm" onclick="delInvoice('${r.id}')">Delete / 删除</button></td>
   </tr>`).join('');
 }
 async function addInvoice() {
   const date=document.getElementById('inv-date').value, invoice_number=document.getElementById('inv-number').value.trim(),
-        company_name=document.getElementById('inv-company').value.trim(), amount=parseFloat(document.getElementById('inv-amount').value);
-  if (!date||!invoice_number||!company_name||isNaN(amount)||amount<=0) { showErr('inv-err','Please fill in all fields. / 请填写所有字段。'); return; }
-  const {error}=await sb.from('invoices').insert({date,invoice_number,company_name,amount,status:'unpaid'});
+        company_name=document.getElementById('inv-company').value.trim(), amount=document.getElementById('inv-amount').value;
+  const {error}=await sb.from('invoices').insert({date:orNull(date),invoice_number,company_name,amount:numOrNull(amount),status:'unpaid'});
   if (error) { dbErr('inv-err',error); return; }
   document.getElementById('inv-number').value=''; document.getElementById('inv-company').value=''; document.getElementById('inv-amount').value='';
   await loadInvoices();
@@ -932,8 +949,7 @@ async function addPermit() {
         permit_number=document.getElementById('wp-permit').value.trim(),
         expiry_date=document.getElementById('wp-expiry').value,
         csoc_expiry=document.getElementById('wp-csoc').value;
-  if (!worker_name||!permit_number||!expiry_date) { showErr('wp-err','Worker name, permit number and WP expiry are required. / 员工姓名、准证号码和准证到期日为必填。'); return; }
-  const {error}=await sb.from('work_permits').insert({worker_name,fin_number:fin_number||null,permit_number,expiry_date,csoc_expiry:csoc_expiry||null});
+  const {error}=await sb.from('work_permits').insert({worker_name,fin_number:orNull(fin_number),permit_number,expiry_date:orNull(expiry_date),csoc_expiry:orNull(csoc_expiry)});
   if (error) { dbErr('wp-err',error); return; }
   ['wp-name','wp-fin','wp-permit','wp-expiry','wp-csoc'].forEach(i=>document.getElementById(i).value='');
   await loadPermits(); refreshAlerts();
@@ -957,7 +973,7 @@ function renderRoadTax() {
   tbody.innerHTML=roadtaxes.map(r=> rtEdit===r.id ? `<tr>
     <td><input type="text" id="edrt-plate" value="${escH(r.plate_number)}"></td>
     <td><input type="text" id="edrt-desc" value="${escH(r.description||'')}"></td>
-    <td><input type="date" id="edrt-expiry" value="${r.expiry_date}"></td>
+    <td><input type="date" id="edrt-expiry" value="${r.expiry_date||''}"></td>
     <td>${expiryBadge(daysUntil(r.expiry_date))}</td>
     <td class="td-actions"><button class="btn btn-success btn-sm" onclick="saveEditRoadTax('${r.id}')">Save / 保存</button><button class="btn btn-sm" onclick="cancelEditRoadTax()">Cancel / 取消</button></td>
   </tr>` : `<tr>
@@ -970,8 +986,7 @@ async function addRoadTax() {
   const plate_number=document.getElementById('rt-plate').value.trim().toUpperCase(),
         description=document.getElementById('rt-desc').value.trim(),
         expiry_date=document.getElementById('rt-expiry').value;
-  if (!plate_number||!expiry_date) { showErr('rt-err','Plate number and expiry date required. / 请填写车牌号和到期日。'); return; }
-  const {error}=await sb.from('road_tax').insert({plate_number,description,expiry_date});
+  const {error}=await sb.from('road_tax').insert({plate_number,description,expiry_date:orNull(expiry_date)});
   if (error) { dbErr('rt-err',error); return; }
   document.getElementById('rt-plate').value=''; document.getElementById('rt-desc').value=''; document.getElementById('rt-expiry').value='';
   await loadRoadTax(); refreshAlerts();
@@ -995,8 +1010,8 @@ function renderInsurance() {
   tbody.innerHTML=insurances.map(i=> insEdit===i.id ? `<tr>
     <td><input type="text" id="edins-name" value="${escH(i.policy_name)}"></td>
     <td><input type="text" id="edins-provider" value="${escH(i.provider)}"></td>
-    <td><input type="date" id="edins-start" value="${i.start_date}"></td>
-    <td><input type="date" id="edins-expiry" value="${i.expiry_date}"></td>
+    <td><input type="date" id="edins-start" value="${i.start_date||''}"></td>
+    <td><input type="date" id="edins-expiry" value="${i.expiry_date||''}"></td>
     <td>${expiryBadge(daysUntil(i.expiry_date))}</td>
     <td><input type="text" id="edins-notes" value="${escH(i.notes||'')}" style="max-width:160px"></td>
     <td class="td-actions"><button class="btn btn-success btn-sm" onclick="saveEditInsurance('${i.id}')">Save / 保存</button><button class="btn btn-sm" onclick="cancelEditInsurance()">Cancel / 取消</button></td>
@@ -1014,8 +1029,7 @@ async function addInsurance() {
         start_date=document.getElementById('ins-start').value,
         expiry_date=document.getElementById('ins-expiry').value,
         notes=document.getElementById('ins-notes').value.trim();
-  if (!policy_name||!provider||!start_date||!expiry_date) { showErr('ins-err','Please fill in all required fields. / 请填写必填字段。'); return; }
-  const {error}=await sb.from('insurance_policies').insert({policy_name,provider,start_date,expiry_date,notes});
+  const {error}=await sb.from('insurance_policies').insert({policy_name,provider,start_date:orNull(start_date),expiry_date:orNull(expiry_date),notes});
   if (error) { dbErr('ins-err',error); return; }
   document.getElementById('ins-name').value=''; document.getElementById('ins-provider').value='';
   document.getElementById('ins-start').value=''; document.getElementById('ins-expiry').value=''; document.getElementById('ins-notes').value='';
@@ -1035,8 +1049,8 @@ async function loadLicensing() {
   licensing=data||[]; renderLicensing(); renderLiSummary();
 }
 function renderLiSummary() {
-  const total=licensing.reduce((s,i)=>s+parseFloat(i.amount),0);
-  const paid=licensing.filter(i=>i.status==='paid').reduce((s,i)=>s+parseFloat(i.amount),0);
+  const total=licensing.reduce((s,i)=>s+parseFloat(i.amount||0),0);
+  const paid=licensing.filter(i=>i.status==='paid').reduce((s,i)=>s+parseFloat(i.amount||0),0);
   document.getElementById('li-summary').innerHTML = `
     <div class="sum-item"><div class="sum-val">$${total.toFixed(2)}</div><div class="sum-lbl">Total</div><div class="sum-lbl-zh">发票总额</div></div>
     <div class="sum-item"><div class="sum-val" style="color:#059669">$${paid.toFixed(2)}</div><div class="sum-lbl">Collected</div><div class="sum-lbl-zh">已收款</div></div>
@@ -1050,21 +1064,21 @@ function setLiSearch(v) { liSearch=v.trim().toLowerCase(); document.getElementBy
 function clearLiSearch() { liSearch=''; document.getElementById('li-search').value=''; document.getElementById('li-search-clear').style.display='none'; renderLicensing(); }
 function renderLicensing() {
   let rows=(liFilter==='all'?licensing.slice():licensing.filter(i=>i.status===liFilter));
-  if (liSearch) rows=rows.filter(i=>i.invoice_number.toLowerCase().includes(liSearch));
+  if (liSearch) rows=rows.filter(i=>(i.invoice_number||'').toLowerCase().includes(liSearch));
   rows=sortRows(rows,liSort);
   const tbody=document.getElementById('li-tbody');
   if (!rows.length) { tbody.innerHTML=`<tr><td colspan="7" class="empty">No licensing invoices / 暂无牌照发票</td></tr>`; return; }
   tbody.innerHTML=rows.map(r=> liEdit===r.id ? `<tr>
-    <td><input type="date" id="edli-date" value="${r.date}"></td>
+    <td><input type="date" id="edli-date" value="${r.date||''}"></td>
     <td><input type="text" id="edli-num" value="${escH(r.invoice_number)}"></td>
     <td><input type="text" id="edli-co" value="${escH(r.company_name)}"></td>
-    <td><input type="number" step="0.01" min="0" id="edli-amt" value="${r.amount}"></td>
+    <td><input type="number" step="0.01" min="0" id="edli-amt" value="${r.amount??''}"></td>
     <td><span class="badge ${r.status==='paid'?'badge-paid':'badge-unpaid'}">${r.status==='paid'?'Paid / 已付款':'Unpaid / 未付款'}</span></td>
     <td>${fmtDate(r.paid_date)}</td>
     <td class="td-actions"><button class="btn btn-success btn-sm" onclick="saveEditLicensing('${r.id}')">Save / 保存</button><button class="btn btn-sm" onclick="cancelEditLicensing()">Cancel / 取消</button></td>
   </tr>` : `<tr>
     <td>${fmtDate(r.date)}</td><td><strong>${escH(r.invoice_number)}</strong></td><td>${escH(r.company_name)}</td>
-    <td><strong>$${parseFloat(r.amount).toFixed(2)}</strong></td>
+    <td><strong>${fmtAmt(r.amount)}</strong></td>
     <td><span class="badge ${r.status==='paid'?'badge-paid':'badge-unpaid'}">${r.status==='paid'?'Paid / 已付款':'Unpaid / 未付款'}</span></td>
     <td>${fmtDate(r.paid_date)}</td>
     <td class="td-actions"><button class="btn btn-sm" onclick="startEditLicensing('${r.id}')">Edit / 编辑</button>${r.status==='unpaid'?`<button class="btn btn-success btn-sm" onclick="markLiPaid('${r.id}')">Mark Paid / 标记付款</button>`:''}<button class="btn btn-danger btn-sm" onclick="delLicensing('${r.id}')">Delete / 删除</button></td>
@@ -1072,9 +1086,8 @@ function renderLicensing() {
 }
 async function addLicensing() {
   const date=document.getElementById('li-date').value, invoice_number=document.getElementById('li-number').value.trim(),
-        company_name=document.getElementById('li-company').value.trim(), amount=parseFloat(document.getElementById('li-amount').value);
-  if (!date||!invoice_number||!company_name||isNaN(amount)||amount<=0) { showErr('li-err','Please fill in all fields. / 请填写所有字段。'); return; }
-  const {error}=await sb.from('licensing_invoices').insert({date,invoice_number,company_name,amount,status:'unpaid'});
+        company_name=document.getElementById('li-company').value.trim(), amount=document.getElementById('li-amount').value;
+  const {error}=await sb.from('licensing_invoices').insert({date:orNull(date),invoice_number,company_name,amount:numOrNull(amount),status:'unpaid'});
   if (error) { dbErr('li-err',error); return; }
   document.getElementById('li-number').value=''; document.getElementById('li-company').value=''; document.getElementById('li-amount').value='';
   await loadLicensing();
@@ -1095,9 +1108,8 @@ function startEditInv(id){ invEdit=id; renderInvoices(); }
 function cancelEditInv(){ invEdit=null; renderInvoices(); }
 async function saveEditInv(id){
   const date=document.getElementById('edi-date').value, invoice_number=document.getElementById('edi-num').value.trim(),
-        company_name=document.getElementById('edi-co').value.trim(), amount=parseFloat(document.getElementById('edi-amt').value);
-  if(!date||!invoice_number||!company_name||isNaN(amount)||amount<=0){ alert('Please fill in all fields. / 请填写所有字段。'); return; }
-  const {error}=await sb.from('invoices').update({date,invoice_number,company_name,amount}).eq('id',id);
+        company_name=document.getElementById('edi-co').value.trim(), amount=document.getElementById('edi-amt').value;
+  const {error}=await sb.from('invoices').update({date:orNull(date),invoice_number,company_name,amount:numOrNull(amount)}).eq('id',id);
   if(error){ alert('Error: '+error.message); return; }
   invEdit=null; await loadInvoices();
 }
@@ -1106,33 +1118,31 @@ async function saveEditInv(id){
 const PAYTABS={ uob:{table:'uob_payments',f2:'invoice_number'}, ocbc:{table:'ocbc_payments',f2:'invoice_number'} };
 async function loadPay(k){ const c=PAYTABS[k]; const tb=document.getElementById(k+'-tbody'); if(!tb) return;
   const {data,error}=await sb.from(c.table).select('*').order('date',{ascending:false});
-  if(error){ if(isMissingTable(error)){ tb.innerHTML=`<tr><td colspan="4" class="empty" style="color:#B45309">Run the setup SQL above to create this table. / 请运行上方SQL以创建此表。</td></tr>`; document.getElementById('setup-banner').style.display='block'; } else { console.error(error); } return; }
+  if(error){ if(isMissingTable(error)){ tb.innerHTML=`<tr><td colspan="5" class="empty" style="color:#B45309">Run the setup SQL above to create this table. / 请运行上方SQL以创建此表。</td></tr>`; document.getElementById('setup-banner').style.display='block'; } else { console.error(error); } return; }
   payData[k]=data||[]; renderPay(k);
 }
 function renderPay(k){ const c=PAYTABS[k], rows=payData[k]||[], tb=document.getElementById(k+'-tbody'); if(!tb) return;
   const total=rows.reduce((s,r)=>s+parseFloat(r.amount||0),0);
   const sm=document.getElementById(k+'-summary'); if(sm) sm.innerHTML=`<div class="sum-item"><div class="sum-val">$${total.toFixed(2)}</div><div class="sum-lbl">Total</div><div class="sum-lbl-zh">总额</div></div><div class="sum-item"><div class="sum-val">${rows.length}</div><div class="sum-lbl">Entries</div><div class="sum-lbl-zh">条目</div></div>`;
-  if(!rows.length){ tb.innerHTML=`<tr><td colspan="4" class="empty">No entries / 暂无记录</td></tr>`; return; }
+  if(!rows.length){ tb.innerHTML=`<tr><td colspan="5" class="empty">No entries / 暂无记录</td></tr>`; return; }
   tb.innerHTML=rows.map(r=> payEdit[k]===r.id
-    ? `<tr><td><input type="date" id="edp-${k}-date" value="${r.date}"></td><td><input type="text" id="edp-${k}-f2" value="${escH(r[c.f2])}"></td><td><input type="number" step="0.01" min="0" id="edp-${k}-amt" value="${r.amount}"></td><td class="td-actions"><button class="btn btn-success btn-sm" onclick="saveEditPay('${k}','${r.id}')">Save / 保存</button><button class="btn btn-sm" onclick="cancelEditPay('${k}')">Cancel / 取消</button></td></tr>`
-    : `<tr><td>${fmtDate(r.date)}</td><td><strong>${escH(r[c.f2])}</strong></td><td><strong>$${parseFloat(r.amount).toFixed(2)}</strong></td><td class="td-actions"><button class="btn btn-sm" onclick="startEditPay('${k}','${r.id}')">Edit / 编辑</button><button class="btn btn-danger btn-sm" onclick="delPay('${k}','${r.id}')">Delete / 删除</button></td></tr>`
+    ? `<tr><td><input type="date" id="edp-${k}-date" value="${r.date||''}"></td><td><input type="text" id="edp-${k}-f2" value="${escH(r[c.f2])}"></td><td><input type="text" id="edp-${k}-name" value="${escH(r.name)}"></td><td><input type="number" step="0.01" min="0" id="edp-${k}-amt" value="${r.amount??''}"></td><td class="td-actions"><button class="btn btn-success btn-sm" onclick="saveEditPay('${k}','${r.id}')">Save / 保存</button><button class="btn btn-sm" onclick="cancelEditPay('${k}')">Cancel / 取消</button></td></tr>`
+    : `<tr><td>${fmtDate(r.date)}</td><td><strong>${escH(r[c.f2])}</strong></td><td>${r.name?escH(r.name):'—'}</td><td><strong>${fmtAmt(r.amount)}</strong></td><td class="td-actions"><button class="btn btn-sm" onclick="startEditPay('${k}','${r.id}')">Edit / 编辑</button><button class="btn btn-danger btn-sm" onclick="delPay('${k}','${r.id}')">Delete / 删除</button></td></tr>`
   ).join('');
 }
 function startEditPay(k,id){ payEdit[k]=id; renderPay(k); }
 function cancelEditPay(k){ payEdit[k]=null; renderPay(k); }
 async function saveEditPay(k,id){ const c=PAYTABS[k];
-  const date=document.getElementById('edp-'+k+'-date').value, f2=document.getElementById('edp-'+k+'-f2').value.trim(), amount=parseFloat(document.getElementById('edp-'+k+'-amt').value);
-  if(!date||!f2||isNaN(amount)||amount<=0){ alert('Please fill in all fields. / 请填写所有字段。'); return; }
-  const upd={date,amount}; upd[c.f2]=f2;
+  const date=document.getElementById('edp-'+k+'-date').value, f2=document.getElementById('edp-'+k+'-f2').value.trim(), name=document.getElementById('edp-'+k+'-name').value.trim(), amount=document.getElementById('edp-'+k+'-amt').value;
+  const upd={date:orNull(date),amount:numOrNull(amount),name:orNull(name)}; upd[c.f2]=f2;
   const {error}=await sb.from(c.table).update(upd).eq('id',id); if(error){ alert('Error: '+error.message); return; }
   payEdit[k]=null; await loadPay(k);
 }
 async function addPay(k){ const c=PAYTABS[k];
-  const date=document.getElementById(k+'-date').value, f2=document.getElementById(k+'-f2').value.trim(), amount=parseFloat(document.getElementById(k+'-amt').value);
-  if(!date||!f2||isNaN(amount)||amount<=0){ showErr(k+'-err','Please fill in all fields. / 请填写所有字段。'); return; }
-  const ins={date,amount}; ins[c.f2]=f2;
+  const date=document.getElementById(k+'-date').value, f2=document.getElementById(k+'-f2').value.trim(), name=document.getElementById(k+'-name').value.trim(), amount=document.getElementById(k+'-amt').value;
+  const ins={date:orNull(date),amount:numOrNull(amount),name:orNull(name)}; ins[c.f2]=f2;
   const {error}=await sb.from(c.table).insert(ins); if(error){ dbErr(k+'-err',error); return; }
-  document.getElementById(k+'-f2').value=''; document.getElementById(k+'-amt').value=''; await loadPay(k);
+  ['-f2','-name','-amt'].forEach(s=>document.getElementById(k+s).value=''); await loadPay(k);
 }
 async function delPay(k,id){ const c=PAYTABS[k]; if(!confirm('Delete this entry? / 确认删除？')) return;
   const {error}=await sb.from(c.table).delete().eq('id',id); if(error){ alert('Error: '+error.message); return; } await loadPay(k);
@@ -1143,32 +1153,28 @@ function startEditPermit(id){ wpEdit=id; renderPermits(); }
 function cancelEditPermit(){ wpEdit=null; renderPermits(); }
 async function saveEditPermit(id){
   const worker_name=document.getElementById('edwp-name').value.trim(), fin_number=document.getElementById('edwp-fin').value.trim(), permit_number=document.getElementById('edwp-permit').value.trim(), expiry_date=document.getElementById('edwp-expiry').value, csoc_expiry=document.getElementById('edwp-csoc').value;
-  if(!worker_name||!permit_number||!expiry_date){ alert('Worker name, permit number and WP expiry are required. / 员工姓名、准证号码和准证到期日为必填。'); return; }
-  const {error}=await sb.from('work_permits').update({worker_name,fin_number:fin_number||null,permit_number,expiry_date,csoc_expiry:csoc_expiry||null}).eq('id',id);
+  const {error}=await sb.from('work_permits').update({worker_name,fin_number:orNull(fin_number),permit_number,expiry_date:orNull(expiry_date),csoc_expiry:orNull(csoc_expiry)}).eq('id',id);
   if(error){ alert('Error: '+error.message); return; } wpEdit=null; await loadPermits(); refreshAlerts();
 }
 function startEditRoadTax(id){ rtEdit=id; renderRoadTax(); }
 function cancelEditRoadTax(){ rtEdit=null; renderRoadTax(); }
 async function saveEditRoadTax(id){
   const plate_number=document.getElementById('edrt-plate').value.trim().toUpperCase(), description=document.getElementById('edrt-desc').value.trim(), expiry_date=document.getElementById('edrt-expiry').value;
-  if(!plate_number||!expiry_date){ alert('Plate number and expiry date required. / 请填写车牌号和到期日。'); return; }
-  const {error}=await sb.from('road_tax').update({plate_number,description,expiry_date}).eq('id',id);
+  const {error}=await sb.from('road_tax').update({plate_number,description,expiry_date:orNull(expiry_date)}).eq('id',id);
   if(error){ alert('Error: '+error.message); return; } rtEdit=null; await loadRoadTax(); refreshAlerts();
 }
 function startEditInsurance(id){ insEdit=id; renderInsurance(); }
 function cancelEditInsurance(){ insEdit=null; renderInsurance(); }
 async function saveEditInsurance(id){
   const policy_name=document.getElementById('edins-name').value.trim(), provider=document.getElementById('edins-provider').value.trim(), start_date=document.getElementById('edins-start').value, expiry_date=document.getElementById('edins-expiry').value, notes=document.getElementById('edins-notes').value.trim();
-  if(!policy_name||!provider||!start_date||!expiry_date){ alert('Please fill in all required fields. / 请填写必填字段。'); return; }
-  const {error}=await sb.from('insurance_policies').update({policy_name,provider,start_date,expiry_date,notes}).eq('id',id);
+  const {error}=await sb.from('insurance_policies').update({policy_name,provider,start_date:orNull(start_date),expiry_date:orNull(expiry_date),notes}).eq('id',id);
   if(error){ alert('Error: '+error.message); return; } insEdit=null; await loadInsurance(); refreshAlerts();
 }
 function startEditLicensing(id){ liEdit=id; renderLicensing(); }
 function cancelEditLicensing(){ liEdit=null; renderLicensing(); }
 async function saveEditLicensing(id){
-  const date=document.getElementById('edli-date').value, invoice_number=document.getElementById('edli-num').value.trim(), company_name=document.getElementById('edli-co').value.trim(), amount=parseFloat(document.getElementById('edli-amt').value);
-  if(!date||!invoice_number||!company_name||isNaN(amount)||amount<=0){ alert('Please fill in all fields. / 请填写所有字段。'); return; }
-  const {error}=await sb.from('licensing_invoices').update({date,invoice_number,company_name,amount}).eq('id',id);
+  const date=document.getElementById('edli-date').value, invoice_number=document.getElementById('edli-num').value.trim(), company_name=document.getElementById('edli-co').value.trim(), amount=document.getElementById('edli-amt').value;
+  const {error}=await sb.from('licensing_invoices').update({date:orNull(date),invoice_number,company_name,amount:numOrNull(amount)}).eq('id',id);
   if(error){ alert('Error: '+error.message); return; } liEdit=null; await loadLicensing();
 }
 
@@ -1187,8 +1193,8 @@ function exportPDF(){
   const t=k=>(payData[k]||[]).reduce((s,r)=>s+parseFloat(r.amount),0);
   let html=`<div class="pr-head"><h1>Evergrow Electrical Service — Records Report</h1><div class="pr-date">Generated: ${stamp}</div></div>`;
   html+=sec('Invoices / 发票',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Invoice No.',f:r=>escH(r.invoice_number)},{h:'Company',f:r=>escH(r.company_name)},{h:'Amount',f:r=>money(r.amount)},{h:'Status',f:r=>r.status==='paid'?'Paid':'Unpaid'}],invoices,`Total ${money(invTot)} · Collected ${money(invPaid)} · Outstanding ${money(invTot-invPaid)}`);
-  html+=sec('UOB Payments / 大华银行付款',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Invoice No.',f:r=>escH(r.invoice_number)},{h:'Amount',f:r=>money(r.amount)}],payData.uob,`Total ${money(t('uob'))}`);
-  html+=sec('OCBC Payments / 华侨银行付款',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Invoice No.',f:r=>escH(r.invoice_number)},{h:'Amount',f:r=>money(r.amount)}],payData.ocbc,`Total ${money(t('ocbc'))}`);
+  html+=sec('UOB Payments / 大华银行付款',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Invoice No.',f:r=>escH(r.invoice_number)},{h:'Name',f:r=>escH(r.name)},{h:'Amount',f:r=>money(r.amount)}],payData.uob,`Total ${money(t('uob'))}`);
+  html+=sec('OCBC Payments / 华侨银行付款',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Invoice No.',f:r=>escH(r.invoice_number)},{h:'Name',f:r=>escH(r.name)},{h:'Amount',f:r=>money(r.amount)}],payData.ocbc,`Total ${money(t('ocbc'))}`);
     html+=sec('Licensing Invoices / 牌照发票',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Invoice No.',f:r=>escH(r.invoice_number)},{h:'Company',f:r=>escH(r.company_name)},{h:'Amount',f:r=>money(r.amount)},{h:'Status',f:r=>r.status==='paid'?'Paid':'Unpaid'}],licensing,`Total ${money(licensing.reduce((s,i)=>s+parseFloat(i.amount),0))}`);
   html+=sec('Work Permits / 工作准证',[{h:'Worker',f:r=>escH(r.worker_name)},{h:'FIN No.',f:r=>r.fin_number?escH(r.fin_number):'—'},{h:'Permit No.',f:r=>escH(r.permit_number)},{h:'WP Expiry',f:r=>fmtDate(r.expiry_date)},{h:'CSOC Expiry',f:r=>fmtDate(r.csoc_expiry)}],permits,'');
   html+=sec('Road Tax / 道路税',[{h:'Plate',f:r=>escH(r.plate_number)},{h:'Description',f:r=>escH(r.description||'')},{h:'Expiry',f:r=>fmtDate(r.expiry_date)}],roadtaxes,'');
