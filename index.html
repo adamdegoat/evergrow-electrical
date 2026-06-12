@@ -824,6 +824,7 @@ function sortRows(rows, sort) {
 function refreshAlerts() {
   const msgs = [];
   permits.forEach(p => { const d = daysUntil(p.expiry_date); if (d !== null && d <= 30) msgs.push(`${escH(p.worker_name)}'s WP (${d < 0 ? 'EXPIRED' : d+'d'})`); });
+  permits.forEach(p => { const d = daysUntil(p.csoc_expiry); if (d !== null && d <= 30) msgs.push(`${escH(p.worker_name)}'s CSOC (${d < 0 ? 'EXPIRED' : d+'d'})`); });
   roadtaxes.forEach(r => { const d = daysUntil(r.expiry_date); if (d !== null && d <= 30) msgs.push(`Road tax ${escH(r.plate_number)} (${d < 0 ? 'EXPIRED' : d+'d'})`); });
   insurances.forEach(i => { const d = daysUntil(i.expiry_date); if (d !== null && d <= 30) msgs.push(`Insurance: ${escH(i.policy_name)} (${d < 0 ? 'EXPIRED' : d+'d'})`); });
   const bar = document.getElementById('alert-bar');
@@ -835,7 +836,7 @@ function refreshAlerts() {
     if (show && !ex) { const d = document.createElement('span'); d.className='tab-dot'; btn.appendChild(d); }
     else if (!show && ex) ex.remove();
   }
-  setDot('permits',   permits.some(p   => { const d=daysUntil(p.expiry_date);   return d!==null&&d<=60; }));
+  setDot('permits',   permits.some(p   => { const dw=daysUntil(p.expiry_date), dc=daysUntil(p.csoc_expiry); return (dw!==null&&dw<=60)||(dc!==null&&dc<=60); }));
   setDot('roadtax',   roadtaxes.some(r => { const d=daysUntil(r.expiry_date);   return d!==null&&d<=60; }));
   setDot('insurance', insurances.some(i => { const d=daysUntil(i.expiry_date); return d!==null&&d<=60; }));
 }
