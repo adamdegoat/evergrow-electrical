@@ -190,6 +190,7 @@
 
     /* BADGES */
     .badge { display: inline-block; padding: 3px 9px; border-radius: 10px; font-size: 0.73rem; font-weight: 600; white-space: nowrap; }
+    .inv-chip { display: inline-block; padding: 2px 8px; margin: 1px 3px 1px 0; border-radius: 7px; font-size: 0.72rem; font-weight: 700; background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; white-space: nowrap; }
     .badge-paid     { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
     .badge-unpaid   { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
     .badge-accepted { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
@@ -562,7 +563,7 @@
         <div class="card-title">➕ Add UOB Payment <span class="zh">添加大华银行付款</span></div>
         <div class="form-grid cols-3">
           <label><div class="lbl-en">Date</div><div class="lbl-zh">日期</div><input type="date" id="uob-date"></label>
-          <label><div class="lbl-en">Invoice Number</div><div class="lbl-zh">发票号码</div><input type="text" id="uob-f2" placeholder="INV-001"></label>
+          <label><div class="lbl-en">Invoice Number(s)</div><div class="lbl-zh">发票号码（可多个）</div><input type="text" id="uob-f2" placeholder="INV-001, INV-002"></label>
           <label><div class="lbl-en">Name</div><div class="lbl-zh">名称</div><input type="text" id="uob-name" placeholder="Name"></label>
           <label><div class="lbl-en">Amount (SGD)</div><div class="lbl-zh">金额（新元）</div><input type="number" id="uob-amt" placeholder="0.00" step="0.01" min="0"></label>
         </div>
@@ -577,7 +578,7 @@
           <table>
             <thead><tr>
               <th>Date<span class="col-zh">日期</span></th>
-              <th>Invoice Number<span class="col-zh">发票号码</span></th>
+              <th>Invoice Number(s)<span class="col-zh">发票号码</span></th>
               <th>Name<span class="col-zh">名称</span></th>
               <th>Amount<span class="col-zh">金额</span></th>
               <th>Actions<span class="col-zh">操作</span></th>
@@ -597,7 +598,7 @@
         <div class="card-title">➕ Add OCBC Payment <span class="zh">添加华侨银行付款</span></div>
         <div class="form-grid cols-3">
           <label><div class="lbl-en">Date</div><div class="lbl-zh">日期</div><input type="date" id="ocbc-date"></label>
-          <label><div class="lbl-en">Invoice Number</div><div class="lbl-zh">发票号码</div><input type="text" id="ocbc-f2" placeholder="INV-001"></label>
+          <label><div class="lbl-en">Invoice Number(s)</div><div class="lbl-zh">发票号码（可多个）</div><input type="text" id="ocbc-f2" placeholder="INV-001, INV-002"></label>
           <label><div class="lbl-en">Name</div><div class="lbl-zh">名称</div><input type="text" id="ocbc-name" placeholder="Name"></label>
           <label><div class="lbl-en">Amount (SGD)</div><div class="lbl-zh">金额（新元）</div><input type="number" id="ocbc-amt" placeholder="0.00" step="0.01" min="0"></label>
         </div>
@@ -612,7 +613,7 @@
           <table>
             <thead><tr>
               <th>Date<span class="col-zh">日期</span></th>
-              <th>Invoice Number<span class="col-zh">发票号码</span></th>
+              <th>Invoice Number(s)<span class="col-zh">发票号码</span></th>
               <th>Name<span class="col-zh">名称</span></th>
               <th>Amount<span class="col-zh">金额</span></th>
               <th>Actions<span class="col-zh">操作</span></th>
@@ -819,6 +820,7 @@ function escH(s) { return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</
 function fmtAmt(v){ return (v===null||v===undefined||v===''||isNaN(parseFloat(v)))?'—':'$'+parseFloat(v).toFixed(2); }
 function orNull(v){ return (v===''||v===undefined)?null:v; }            // empty date/text → null
 function numOrNull(v){ const n=parseFloat(v); return isNaN(n)?null:n; }  // empty/invalid amount → null
+function invChips(s){ if(s===null||s===undefined||String(s).trim()==='') return '—'; return String(s).split(/[,\n;]+/).map(x=>x.trim()).filter(Boolean).map(x=>`<span class="inv-chip">${escH(x)}</span>`).join(''); }
 function showErr(id, msg) {
   const el = document.getElementById(id); if (!el) return;
   el.textContent = msg; el.style.display = 'inline';
@@ -1127,7 +1129,7 @@ function renderPay(k){ const c=PAYTABS[k], rows=payData[k]||[], tb=document.getE
   if(!rows.length){ tb.innerHTML=`<tr><td colspan="5" class="empty">No entries / 暂无记录</td></tr>`; return; }
   tb.innerHTML=rows.map(r=> payEdit[k]===r.id
     ? `<tr><td><input type="date" id="edp-${k}-date" value="${r.date||''}"></td><td><input type="text" id="edp-${k}-f2" value="${escH(r[c.f2])}"></td><td><input type="text" id="edp-${k}-name" value="${escH(r.name)}"></td><td><input type="number" step="0.01" min="0" id="edp-${k}-amt" value="${r.amount??''}"></td><td class="td-actions"><button class="btn btn-success btn-sm" onclick="saveEditPay('${k}','${r.id}')">Save / 保存</button><button class="btn btn-sm" onclick="cancelEditPay('${k}')">Cancel / 取消</button></td></tr>`
-    : `<tr><td>${fmtDate(r.date)}</td><td><strong>${escH(r[c.f2])}</strong></td><td>${r.name?escH(r.name):'—'}</td><td><strong>${fmtAmt(r.amount)}</strong></td><td class="td-actions"><button class="btn btn-sm" onclick="startEditPay('${k}','${r.id}')">Edit / 编辑</button><button class="btn btn-danger btn-sm" onclick="delPay('${k}','${r.id}')">Delete / 删除</button></td></tr>`
+    : `<tr><td>${fmtDate(r.date)}</td><td>${invChips(r[c.f2])}</td><td>${r.name?escH(r.name):'—'}</td><td><strong>${fmtAmt(r.amount)}</strong></td><td class="td-actions"><button class="btn btn-sm" onclick="startEditPay('${k}','${r.id}')">Edit / 编辑</button><button class="btn btn-danger btn-sm" onclick="delPay('${k}','${r.id}')">Delete / 删除</button></td></tr>`
   ).join('');
 }
 function startEditPay(k,id){ payEdit[k]=id; renderPay(k); }
