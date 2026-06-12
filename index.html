@@ -399,8 +399,10 @@
         <div class="card-title">➕ Add Work Permit <span class="zh">添加工作准证</span></div>
         <div class="form-grid cols-3">
           <label><div class="lbl-en">Worker Name</div><div class="lbl-zh">员工姓名</div><input type="text" id="wp-name" placeholder="Full name"></label>
+          <label><div class="lbl-en">FIN Number</div><div class="lbl-zh">FIN号码</div><input type="text" id="wp-fin" placeholder="e.g. G1234567X"></label>
           <label><div class="lbl-en">Permit Number</div><div class="lbl-zh">准证号码</div><input type="text" id="wp-permit" placeholder="WP1234567A"></label>
-          <label><div class="lbl-en">Expiry Date</div><div class="lbl-zh">到期日</div><input type="date" id="wp-expiry"></label>
+          <label><div class="lbl-en">WP Expiry</div><div class="lbl-zh">准证到期日</div><input type="date" id="wp-expiry"></label>
+          <label><div class="lbl-en">CSOC Expiry</div><div class="lbl-zh">CSOC到期日</div><input type="date" id="wp-csoc"></label>
         </div>
         <div class="form-actions">
           <button class="btn btn-primary" onclick="addPermit()">Add Permit / 添加准证</button>
@@ -412,12 +414,13 @@
           <table>
             <thead><tr>
               <th>Worker Name<span class="col-zh">员工姓名</span></th>
+              <th>FIN Number<span class="col-zh">FIN号码</span></th>
               <th>Permit No.<span class="col-zh">准证号码</span></th>
-              <th>Expiry Date<span class="col-zh">到期日</span></th>
-              <th>Days Left<span class="col-zh">剩余天数</span></th>
+              <th>WP Expiry<span class="col-zh">准证到期日</span></th>
+              <th>CSOC Expiry<span class="col-zh">CSOC到期日</span></th>
               <th>Actions<span class="col-zh">操作</span></th>
             </tr></thead>
-            <tbody id="wp-tbody"><tr><td colspan="5" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
+            <tbody id="wp-tbody"><tr><td colspan="6" class="empty"><span class="spinner"></span> Loading...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -640,9 +643,12 @@ CREATE TABLE IF NOT EXISTS quotations (
 );
 CREATE TABLE IF NOT EXISTS work_permits (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  worker_name text NOT NULL, permit_number text NOT NULL,
-  expiry_date date NOT NULL, created_at timestamptz DEFAULT now()
+  worker_name text NOT NULL, fin_number text, permit_number text NOT NULL,
+  expiry_date date NOT NULL, csoc_expiry date, created_at timestamptz DEFAULT now()
 );
+-- add new columns to existing work_permits tables (safe to re-run):
+ALTER TABLE work_permits ADD COLUMN IF NOT EXISTS fin_number text;
+ALTER TABLE work_permits ADD COLUMN IF NOT EXISTS csoc_expiry date;
 CREATE TABLE IF NOT EXISTS road_tax (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   plate_number text NOT NULL, description text,
@@ -902,27 +908,33 @@ async function loadPermits() {
 }
 function renderPermits() {
   const tbody=document.getElementById('wp-tbody');
-  if (!permits.length) { tbody.innerHTML=`<tr><td colspan="5" class="empty">No permits on record / 暂无准证记录</td></tr>`; return; }
+  if (!permits.length) { tbody.innerHTML=`<tr><td colspan="6" class="empty">No permits on record / 暂无准证记录</td></tr>`; return; }
   tbody.innerHTML=permits.map(p=> wpEdit===p.id ? `<tr>
     <td><input type="text" id="edwp-name" value="${escH(p.worker_name)}"></td>
+    <td><input type="text" id="edwp-fin" value="${escH(p.fin_number||'')}"></td>
     <td><input type="text" id="edwp-permit" value="${escH(p.permit_number)}"></td>
-    <td><input type="date" id="edwp-expiry" value="${p.expiry_date}"></td>
-    <td>${expiryBadge(daysUntil(p.expiry_date))}</td>
+    <td><input type="date" id="edwp-expiry" value="${p.expiry_date||''}"></td>
+    <td><input type="date" id="edwp-csoc" value="${p.csoc_expiry||''}"></td>
     <td class="td-actions"><button class="btn btn-success btn-sm" onclick="saveEditPermit('${p.id}')">Save / 保存</button><button class="btn btn-sm" onclick="cancelEditPermit()">Cancel / 取消</button></td>
   </tr>` : `<tr>
-    <td><strong>${escH(p.worker_name)}</strong></td><td>${escH(p.permit_number)}</td>
-    <td>${fmtDate(p.expiry_date)}</td><td>${expiryBadge(daysUntil(p.expiry_date))}</td>
+    <td><strong>${escH(p.worker_name)}</strong></td>
+    <td>${p.fin_number?escH(p.fin_number):'—'}</td>
+    <td>${escH(p.permit_number)}</td>
+    <td>${fmtDate(p.expiry_date)} ${expiryBadge(daysUntil(p.expiry_date))}</td>
+    <td>${p.csoc_expiry?fmtDate(p.csoc_expiry)+' '+expiryBadge(daysUntil(p.csoc_expiry)):'—'}</td>
     <td class="td-actions"><button class="btn btn-sm" onclick="startEditPermit('${p.id}')">Edit / 编辑</button><button class="btn btn-danger btn-sm" onclick="delPermit('${p.id}')">Delete / 删除</button></td>
   </tr>`).join('');
 }
 async function addPermit() {
   const worker_name=document.getElementById('wp-name').value.trim(),
+        fin_number=document.getElementById('wp-fin').value.trim(),
         permit_number=document.getElementById('wp-permit').value.trim(),
-        expiry_date=document.getElementById('wp-expiry').value;
-  if (!worker_name||!permit_number||!expiry_date) { showErr('wp-err','Please fill in all fields. / 请填写所有字段。'); return; }
-  const {error}=await sb.from('work_permits').insert({worker_name,permit_number,expiry_date});
+        expiry_date=document.getElementById('wp-expiry').value,
+        csoc_expiry=document.getElementById('wp-csoc').value;
+  if (!worker_name||!permit_number||!expiry_date) { showErr('wp-err','Worker name, permit number and WP expiry are required. / 员工姓名、准证号码和准证到期日为必填。'); return; }
+  const {error}=await sb.from('work_permits').insert({worker_name,fin_number:fin_number||null,permit_number,expiry_date,csoc_expiry:csoc_expiry||null});
   if (error) { dbErr('wp-err',error); return; }
-  document.getElementById('wp-name').value=''; document.getElementById('wp-permit').value=''; document.getElementById('wp-expiry').value='';
+  ['wp-name','wp-fin','wp-permit','wp-expiry','wp-csoc'].forEach(i=>document.getElementById(i).value='');
   await loadPermits(); refreshAlerts();
 }
 async function delPermit(id) {
@@ -1129,9 +1141,9 @@ async function delPay(k,id){ const c=PAYTABS[k]; if(!confirm('Delete this entry?
 function startEditPermit(id){ wpEdit=id; renderPermits(); }
 function cancelEditPermit(){ wpEdit=null; renderPermits(); }
 async function saveEditPermit(id){
-  const worker_name=document.getElementById('edwp-name').value.trim(), permit_number=document.getElementById('edwp-permit').value.trim(), expiry_date=document.getElementById('edwp-expiry').value;
-  if(!worker_name||!permit_number||!expiry_date){ alert('Please fill in all fields. / 请填写所有字段。'); return; }
-  const {error}=await sb.from('work_permits').update({worker_name,permit_number,expiry_date}).eq('id',id);
+  const worker_name=document.getElementById('edwp-name').value.trim(), fin_number=document.getElementById('edwp-fin').value.trim(), permit_number=document.getElementById('edwp-permit').value.trim(), expiry_date=document.getElementById('edwp-expiry').value, csoc_expiry=document.getElementById('edwp-csoc').value;
+  if(!worker_name||!permit_number||!expiry_date){ alert('Worker name, permit number and WP expiry are required. / 员工姓名、准证号码和准证到期日为必填。'); return; }
+  const {error}=await sb.from('work_permits').update({worker_name,fin_number:fin_number||null,permit_number,expiry_date,csoc_expiry:csoc_expiry||null}).eq('id',id);
   if(error){ alert('Error: '+error.message); return; } wpEdit=null; await loadPermits(); refreshAlerts();
 }
 function startEditRoadTax(id){ rtEdit=id; renderRoadTax(); }
@@ -1177,7 +1189,7 @@ function exportPDF(){
   html+=sec('UOB Payments / 大华银行付款',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Invoice No.',f:r=>escH(r.invoice_number)},{h:'Amount',f:r=>money(r.amount)}],payData.uob,`Total ${money(t('uob'))}`);
   html+=sec('OCBC Payments / 华侨银行付款',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Invoice No.',f:r=>escH(r.invoice_number)},{h:'Amount',f:r=>money(r.amount)}],payData.ocbc,`Total ${money(t('ocbc'))}`);
     html+=sec('Licensing Invoices / 牌照发票',[{h:'Date',f:r=>fmtDate(r.date)},{h:'Invoice No.',f:r=>escH(r.invoice_number)},{h:'Company',f:r=>escH(r.company_name)},{h:'Amount',f:r=>money(r.amount)},{h:'Status',f:r=>r.status==='paid'?'Paid':'Unpaid'}],licensing,`Total ${money(licensing.reduce((s,i)=>s+parseFloat(i.amount),0))}`);
-  html+=sec('Work Permits / 工作准证',[{h:'Worker',f:r=>escH(r.worker_name)},{h:'Permit No.',f:r=>escH(r.permit_number)},{h:'Expiry',f:r=>fmtDate(r.expiry_date)}],permits,'');
+  html+=sec('Work Permits / 工作准证',[{h:'Worker',f:r=>escH(r.worker_name)},{h:'FIN No.',f:r=>r.fin_number?escH(r.fin_number):'—'},{h:'Permit No.',f:r=>escH(r.permit_number)},{h:'WP Expiry',f:r=>fmtDate(r.expiry_date)},{h:'CSOC Expiry',f:r=>fmtDate(r.csoc_expiry)}],permits,'');
   html+=sec('Road Tax / 道路税',[{h:'Plate',f:r=>escH(r.plate_number)},{h:'Description',f:r=>escH(r.description||'')},{h:'Expiry',f:r=>fmtDate(r.expiry_date)}],roadtaxes,'');
   html+=sec('Insurance / 保险',[{h:'Policy',f:r=>escH(r.policy_name)},{h:'Provider',f:r=>escH(r.provider)},{h:'Start',f:r=>fmtDate(r.start_date)},{h:'Expiry',f:r=>fmtDate(r.expiry_date)}],insurances,'');
   let pa=document.getElementById('print-area'); if(!pa){ pa=document.createElement('div'); pa.id='print-area'; document.body.appendChild(pa); }

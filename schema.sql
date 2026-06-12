@@ -27,10 +27,15 @@ CREATE TABLE IF NOT EXISTS quotations (
 CREATE TABLE IF NOT EXISTS work_permits (
   id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   worker_name   text NOT NULL,
+  fin_number    text,
   permit_number text NOT NULL,
   expiry_date   date NOT NULL,
+  csoc_expiry   date,
   created_at    timestamptz DEFAULT now()
 );
+-- add new columns to existing work_permits tables (safe to re-run):
+ALTER TABLE work_permits ADD COLUMN IF NOT EXISTS fin_number text;
+ALTER TABLE work_permits ADD COLUMN IF NOT EXISTS csoc_expiry date;
 
 CREATE TABLE IF NOT EXISTS road_tax (
   id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
