@@ -4,7 +4,49 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Evergrow Electrical Service — Manager Portal</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#F59E0B">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Evergrow">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Ccircle cx='30' cy='30' r='30' fill='%23F59E0B'/%3E%3Cpolygon points='35,9 21,30 29,30 25,51 39,30 31,30' fill='%231E293B'/%3E%3C/svg%3E">
+  <style>
+    .ev-install{display:flex;align-items:center;gap:12px;width:100%;margin-top:18px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border:1.5px solid #F59E0B;border-radius:14px;padding:13px 15px;cursor:pointer;text-align:left;font-family:'Inter',sans-serif;transition:.15s;animation:evpulse 2.6s ease-in-out infinite}
+    .ev-install:hover{transform:translateY(-1px)}
+    .ev-install .ei-ic{font-size:23px}
+    .ev-install .ei-tx{flex:1;display:flex;flex-direction:column;line-height:1.3}
+    .ev-install .ei-tx b{font-size:14px;color:#92400E;font-family:'Noto Sans SC','Inter',sans-serif}
+    .ev-install .ei-tx small{font-size:11.5px;color:#B45309;font-family:'Noto Sans SC','Inter',sans-serif}
+    .ev-install .ei-ar{color:#D97706;font-weight:800;font-size:17px}
+    @keyframes evpulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0)}50%{box-shadow:0 0 0 5px rgba(245,158,11,.16)}}
+    .ev-modal{position:fixed;inset:0;z-index:99999;background:rgba(30,41,59,.55);backdrop-filter:blur(5px);display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 16px;font-family:'Inter',sans-serif}
+    .ev-modal.open{display:flex}
+    .ev-mbox{width:100%;max-width:460px;background:#fff;border-radius:22px;padding:30px 26px;margin:auto;box-shadow:0 30px 80px rgba(0,0,0,.3)}
+    .ev-mx{float:right;background:#F1F5F9;border:0;width:34px;height:34px;border-radius:10px;font-size:19px;cursor:pointer;color:#64748B}
+    .ev-mhead{text-align:center;margin-bottom:20px}
+    .ev-mhead img{width:74px;height:74px;border-radius:18px;margin:4px auto 12px;box-shadow:0 10px 26px rgba(245,158,11,.35)}
+    .ev-mhead h2{font-family:'Noto Sans SC','Inter',sans-serif;font-size:24px;font-weight:700;color:#1E293B}
+    .ev-mhead p{font-family:'Noto Sans SC','Inter',sans-serif;font-size:13px;color:#64748B;margin-top:7px;line-height:1.5}
+    .ev-feats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0 0 22px}
+    .ev-feat{background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:12px 13px}
+    .ev-feat .fi{font-size:18px}
+    .ev-feat b{display:block;font-family:'Noto Sans SC','Inter',sans-serif;font-size:13px;color:#1E293B;margin:5px 0 2px}
+    .ev-feat span{font-size:11px;color:#94A3B8}
+    .ev-seg{display:inline-flex;gap:6px;margin-bottom:12px}
+    .ev-seg button{background:#F1F5F9;border:1px solid #E2E8F0;color:#64748B;font-family:inherit;font-weight:700;font-size:13px;padding:8px 18px;border-radius:30px;cursor:pointer}
+    .ev-seg button.on{background:#F59E0B;color:#fff;border-color:#F59E0B}
+    .ev-steps{counter-reset:s;list-style:none;padding:0;margin:0}
+    .ev-steps li{counter-increment:s;position:relative;padding:12px 0 12px 46px;border-bottom:1px solid #F1F5F9;font-family:'Noto Sans SC','Inter',sans-serif;font-size:15px;color:#1E293B;line-height:1.5}
+    .ev-steps li:last-child{border-bottom:0}
+    .ev-steps li small{display:block;font-family:'Inter',sans-serif;font-size:11.5px;color:#94A3B8;margin-top:2px}
+    .ev-steps li::before{content:counter(s);position:absolute;left:0;top:11px;width:30px;height:30px;border-radius:50%;background:#FEF3C7;border:1px solid #F59E0B;color:#B45309;font-weight:800;font-size:13px;display:grid;place-items:center;font-family:'Inter',sans-serif}
+    .ev-got{width:100%;margin-top:20px;padding:14px;background:#F59E0B;color:#fff;border:0;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;font-family:'Noto Sans SC','Inter',sans-serif}
+    .ev-hidden{display:none!important}
+    @media(max-width:480px){.ev-feats{grid-template-columns:1fr}}
+  </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
@@ -277,6 +319,11 @@
       Login&nbsp;<span style="font-family:'Noto Sans SC',sans-serif;font-weight:400;font-size:0.9em">登录</span>
     </button>
     <div class="login-error" id="login-err"></div>
+    <button class="ev-install" id="evInstall" onclick="openEvGuide()">
+      <span class="ei-ic">📲</span>
+      <span class="ei-tx"><b>安装到手机 · Install app</b><small>像 App 一样打开 · 点这里看安装教学</small></span>
+      <span class="ei-ar">→</span>
+    </button>
   </div>
 </div>
 
@@ -1206,6 +1253,58 @@ function exportPDF(){
   pa.innerHTML=html;
   window.print();
 }
+</script>
+<!-- INSTALL GUIDE (中文 for workers) -->
+<div class="ev-modal" id="evGuide">
+  <div class="ev-mbox">
+    <button class="ev-mx" onclick="closeEvGuide()">×</button>
+    <div class="ev-mhead">
+      <img src="icon-192.png" alt="Evergrow">
+      <h2>把系统装到手机主屏</h2>
+      <p>Put this on your phone · 装一次，以后像普通 App 一样打开</p>
+    </div>
+    <div class="ev-feats">
+      <div class="ev-feat"><div class="fi">⚡</div><b>一键打开</b><span>Opens like a real app</span></div>
+      <div class="ev-feat"><div class="fi">📋</div><b>随时查记录</b><span>Invoices · permits · tax</span></div>
+      <div class="ev-feat"><div class="fi">🔒</div><b>密码保护</b><span>Password protected</span></div>
+      <div class="ev-feat"><div class="fi">📶</div><b>离线也能开</b><span>Works offline</span></div>
+    </div>
+    <div class="ev-seg">
+      <button data-os="ios" class="on">iPhone 苹果</button>
+      <button data-os="and">Android 安卓</button>
+    </div>
+    <ol class="ev-steps" id="evIos">
+      <li>用 <b>Safari</b> 打开本网页（请勿用 Chrome）<small>Open this page in Safari</small></li>
+      <li>点最下方的「分享」按钮（方框 + 向上箭头 ⬆️）<small>Tap the Share button</small></li>
+      <li>向下滑，点「加入主画面」<small>Scroll down → "Add to Home Screen"</small></li>
+      <li>点「加入」，主屏就会出现 Evergrow 图标 🎉<small>Tap "Add" — done!</small></li>
+    </ol>
+    <ol class="ev-steps ev-hidden" id="evAnd">
+      <li>用 <b>Chrome</b> 打开本网页<small>Open this page in Chrome</small></li>
+      <li>点右上角的「⋮」菜单<small>Tap the ⋮ menu (top-right)</small></li>
+      <li>点「安装应用 / 加到主屏幕」<small>"Install app / Add to Home screen"</small></li>
+      <li>点「安装」，就会出现 App 图标 🎉<small>Tap "Install" — done!</small></li>
+    </ol>
+    <button class="ev-got" onclick="closeEvGuide()">知道了 · Got it</button>
+  </div>
+</div>
+
+<script>
+function evSetOs(os){
+  document.querySelectorAll('.ev-seg button').forEach(function(b){b.classList.toggle('on',b.dataset.os===os);});
+  document.getElementById('evIos').classList.toggle('ev-hidden',os!=='ios');
+  document.getElementById('evAnd').classList.toggle('ev-hidden',os!=='and');
+}
+function openEvGuide(){evSetOs(/iPad|iPhone|iPod/.test(navigator.userAgent)?'ios':'and');document.getElementById('evGuide').classList.add('open');}
+function closeEvGuide(){document.getElementById('evGuide').classList.remove('open');}
+document.querySelectorAll('.ev-seg button').forEach(function(b){b.addEventListener('click',function(){evSetOs(b.dataset.os);});});
+document.getElementById('evGuide').addEventListener('click',function(e){if(e.target.id==='evGuide')closeEvGuide();});
+(function(){
+  var sa=(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone;
+  if(sa){var el=document.getElementById('evInstall');if(el)el.classList.add('ev-hidden');}
+  else if(!localStorage.getItem('ev_guide_seen')){openEvGuide();localStorage.setItem('ev_guide_seen','1');}
+})();
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}
 </script>
 </body>
 </html>
