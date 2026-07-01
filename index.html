@@ -166,6 +166,15 @@
     .cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
     @media (max-width: 600px) { .cols-2,.cols-3,.cols-4 { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 400px) { .cols-2,.cols-3,.cols-4 { grid-template-columns: 1fr; } }
+    /* bulk-invoice: one column header on desktop, per-row labels on mobile */
+    .inv-head { display: none; }
+    .inv-head .lbl-en { font-weight: 600; }
+    .ih-spacer { flex: none; width: 34px; }
+    @media (min-width: 601px) {
+      .inv-head { display: flex; gap: 10px; align-items: flex-end; margin: 0 0 6px; }
+      .inv-row .lbl-en, .inv-row .lbl-zh { display: none; }
+      .inv-row > button { flex: none; width: 34px; padding-left: 0; padding-right: 0; }
+    }
     .form-actions { margin-top: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .lbl-en { font-size: 0.78rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
     .lbl-zh { font-family: 'Noto Sans SC', sans-serif; font-size: 0.66rem; color: var(--muted); margin-bottom: 4px; }
@@ -389,22 +398,27 @@
         <div class="sec-title"><div class="en">Invoice Management</div><div class="zh">发票管理</div></div>
       </div>
       <div class="card">
-        <div class="card-title">➕ Add Invoice <span class="zh">添加发票</span></div>
-        <div class="form-grid cols-4">
-          <label><div class="lbl-en">Date</div><div class="lbl-zh">日期</div><input type="date" id="inv-date"></label>
-          <label><div class="lbl-en">Invoice Number</div><div class="lbl-zh">发票号码</div><input type="text" id="inv-number" placeholder="INV-001"></label>
-          <label><div class="lbl-en">Company Name</div><div class="lbl-zh">公司名称</div><input type="text" id="inv-company" placeholder="Company Pte Ltd"></label>
-          <label><div class="lbl-en">Amount (SGD)</div><div class="lbl-zh">金额（新元）</div><input type="number" id="inv-amount" placeholder="0.00" step="0.01" min="0"></label>
+        <div class="card-title">➕ Add Invoice(s) <span class="zh">添加发票（可多张）</span></div>
+        <div class="inv-head">
+          <div class="form-grid cols-4" style="flex:1;margin:0;">
+            <div><div class="lbl-en">Date</div><div class="lbl-zh">日期</div></div>
+            <div><div class="lbl-en">Invoice Number</div><div class="lbl-zh">发票号码</div></div>
+            <div><div class="lbl-en">Company Name</div><div class="lbl-zh">公司名称</div></div>
+            <div><div class="lbl-en">Amount (SGD)</div><div class="lbl-zh">金额（新元）</div></div>
+          </div>
+          <span class="ih-spacer"></span>
         </div>
+        <div id="inv-rows"></div>
         <div class="form-actions">
-          <button class="btn btn-primary" onclick="addInvoice()">Add Invoice / 添加发票</button>
+          <button class="btn" onclick="addInvRow()">+ Add row / 添加一行</button>
+          <button class="btn btn-primary" onclick="addInvoices()">Add all / 全部添加</button>
           <span class="form-err" id="inv-err"></span>
         </div>
       </div>
       <div class="summary-bar" id="inv-summary"></div>
       <div class="search-wrap" style="max-width:320px;">
         <span class="search-icon">🔍</span>
-        <input type="text" id="inv-search" placeholder="Search invoice no. / 搜索发票号" oninput="setInvSearch(this.value)" autocomplete="off">
+        <input type="text" id="inv-search" placeholder="Search invoice no. or company / 搜索发票号或公司" oninput="setInvSearch(this.value)" autocomplete="off">
         <button class="search-clear" id="inv-search-clear" onclick="clearInvSearch()">×</button>
       </div>
       <div class="controls-row">
@@ -804,10 +818,11 @@ function doLogout() { sessionStorage.removeItem('eg_auth'); location.reload(); }
 // BOOT
 window.addEventListener('DOMContentLoaded', () => {
   const today = new Date();
-  ['inv-date','qt-date','li-date'].forEach(id => {
+  ['qt-date','li-date'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.valueAsDate = today;
   });
+  resetInvRows();
   if (sessionStorage.getItem('eg_auth') === '1') {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
@@ -931,7 +946,7 @@ function setInvSearch(v) { invSearch=v.trim().toLowerCase(); document.getElement
 function clearInvSearch() { invSearch=''; document.getElementById('inv-search').value=''; document.getElementById('inv-search-clear').style.display='none'; renderInvoices(); }
 function renderInvoices() {
   let rows = (invFilter==='all'?invoices.slice():invoices.filter(i=>i.status===invFilter));
-  if (invSearch) rows=rows.filter(i=>(i.invoice_number||'').toLowerCase().includes(invSearch));
+  if (invSearch) rows=rows.filter(i=>(i.invoice_number||'').toLowerCase().includes(invSearch) || (i.company_name||'').toLowerCase().includes(invSearch));
   rows = sortRows(rows, invSort);
   const tbody = document.getElementById('inv-tbody');
   if (!rows.length) { tbody.innerHTML=`<tr><td colspan="6" class="empty">No invoices / 暂无发票</td></tr>`; return; }
@@ -949,12 +964,40 @@ function renderInvoices() {
     <td class="td-actions"><button class="btn btn-sm" onclick="startEditInv('${r.id}')">Edit / 编辑</button>${r.status==='unpaid'?`<button class="btn btn-success btn-sm" onclick="markInvPaid('${r.id}')">Mark Paid / 标记付款</button>`:''}<button class="btn btn-danger btn-sm" onclick="delInvoice('${r.id}')">Delete / 删除</button></td>
   </tr>`).join('');
 }
-async function addInvoice() {
-  const date=document.getElementById('inv-date').value, invoice_number=document.getElementById('inv-number').value.trim(),
-        company_name=document.getElementById('inv-company').value.trim(), amount=document.getElementById('inv-amount').value;
-  const {error}=await sb.from('invoices').insert({date:orNull(date),invoice_number,company_name,amount:numOrNull(amount),status:'unpaid'});
-  if (error) { dbErr('inv-err',error); return; }
-  document.getElementById('inv-number').value=''; document.getElementById('inv-company').value=''; document.getElementById('inv-amount').value='';
+function invRowHTML(){
+  const today=new Date().toISOString().split('T')[0];
+  return `<div class="inv-row" style="display:flex;gap:10px;align-items:flex-end;margin-bottom:10px;">
+    <div class="form-grid cols-4" style="flex:1;margin:0;">
+      <label><div class="lbl-en">Date</div><div class="lbl-zh">日期</div><input type="date" class="r-date" value="${today}"></label>
+      <label><div class="lbl-en">Invoice Number</div><div class="lbl-zh">发票号码</div><input type="text" class="r-num" placeholder="INV-001"></label>
+      <label><div class="lbl-en">Company Name</div><div class="lbl-zh">公司名称</div><input type="text" class="r-co" placeholder="COMPANY PTE LTD" style="text-transform:uppercase"></label>
+      <label><div class="lbl-en">Amount (SGD)</div><div class="lbl-zh">金额（新元）</div><input type="number" class="r-amt" placeholder="0.00" step="0.01" min="0"></label>
+    </div>
+    <button class="btn btn-danger btn-sm" title="Remove row / 删除此行" onclick="removeInvRow(this)">×</button>
+  </div>`;
+}
+function resetInvRows(){ const c=document.getElementById('inv-rows'); if(!c) return; c.innerHTML=invRowHTML()+invRowHTML()+invRowHTML(); }
+function addInvRow(){ const c=document.getElementById('inv-rows'); if(!c) return; if(c.querySelectorAll('.inv-row').length>=15){ showErr('inv-err','Max 15 rows at a time / 一次最多15行'); return; } c.insertAdjacentHTML('beforeend', invRowHTML()); }
+function removeInvRow(btn){ const c=document.getElementById('inv-rows'); const row=btn.closest('.inv-row'); if(row) row.remove(); if(c && !c.querySelectorAll('.inv-row').length) addInvRow(); }
+async function addInvoices(){
+  const rows=[...document.querySelectorAll('#inv-rows .inv-row')];
+  const payload=[]; let n=0;
+  for(const row of rows){
+    n++;
+    const date=row.querySelector('.r-date').value;
+    const invoice_number=row.querySelector('.r-num').value.trim();
+    const company_name=row.querySelector('.r-co').value.trim().toUpperCase();   // auto-CAPS, new entries only
+    const amt=numOrNull(row.querySelector('.r-amt').value);
+    if(!invoice_number && !company_name && row.querySelector('.r-amt').value.trim()==='') continue;  // fully blank row → skip
+    if(!date || !invoice_number || !company_name || amt===null){                 // a started row must be complete
+      showErr('inv-err','Row '+n+': fill date, invoice no., company and amount / 请填写完整第 '+n+' 行'); return;
+    }
+    payload.push({date,invoice_number,company_name,amount:amt,status:'unpaid'});
+  }
+  if(!payload.length){ showErr('inv-err','Nothing to add / 没有可添加的'); return; }
+  const {error}=await sb.from('invoices').insert(payload);                       // one batch insert (all-or-nothing)
+  if(error){ dbErr('inv-err',error); return; }
+  resetInvRows();
   await loadInvoices();
 }
 async function markInvPaid(id) {
